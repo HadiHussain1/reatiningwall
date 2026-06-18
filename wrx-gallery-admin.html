@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery Admin — RetainTech</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="site.js"></script>
+  <style>
+    /* Admin-only body override — no shared header needed */
+    body.admin-body { background: #0b0d11; color: var(--text); min-height: 100vh; }
+    .admin-page-wrap { min-height: 100vh; }
+  </style>
+</head>
+<body class="admin-body">
+
+  <!-- ===================== LOGIN GATE ===================== -->
+  <div class="admin-login" id="admin-login">
+    <div class="admin-login-box">
+      <div style="margin-bottom: 1.5rem;">
+        <span style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent); font-size: var(--t-xs); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">
+          <span style="width:0.45rem;height:0.45rem;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+          RetainTech
+        </span>
+      </div>
+      <h1>Gallery Admin</h1>
+      <p>Enter the admin password to manage the gallery.</p>
+
+      <div class="admin-field" style="text-align: left;">
+        <label for="admin-pw">Password</label>
+        <input id="admin-pw" type="password" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <div id="admin-pw-error" style="display:none; color:#c03030; font-size: var(--t-xs); margin-bottom: 0.75rem; text-align: left;"></div>
+      <button id="admin-pw-btn" class="btn btn--primary" style="width:100%; justify-content:center;">
+        Unlock Gallery Admin
+      </button>
+      <p style="margin: 1.5rem 0 0; font-size: var(--t-xs); color: rgba(255,255,255,0.28);">This page is private. The URL is not linked anywhere on the public site.</p>
+    </div>
+  </div>
+
+  <!-- ===================== ADMIN APP ===================== -->
+  <div id="admin-app" class="admin-page-wrap">
+
+    <!-- Admin Header -->
+    <header class="admin-header">
+      <div class="inner">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <a href="index.html" style="color: rgba(255,255,255,0.5); font-size: var(--t-sm); transition: color 160ms;">← Back to site</a>
+          <span style="color: rgba(255,255,255,0.15);">|</span>
+          <span class="admin-badge">Gallery Admin</span>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <a href="our-work.html" target="_blank" class="btn btn--secondary btn--sm">Preview Gallery ↗</a>
+          <button class="btn btn--sm" style="background:rgba(220,60,60,0.15);color:#e06060;border:1px solid rgba(220,60,60,0.25);"
+            onclick="if(confirm('Clear ALL gallery data? This cannot be undone.')){localStorage.removeItem('ace_gallery_v1');location.reload();}">
+            Clear All Data
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <div class="inner">
+
+        <div style="margin-bottom: 2.5rem;">
+          <h1 style="margin: 0 0 0.35rem; font-size: var(--t-2xl); letter-spacing: -0.04em;">Gallery Manager</h1>
+          <p style="margin: 0; color: var(--text-dim); font-size: var(--t-sm);">Manage gallery sections and images. All changes are saved to your browser's local storage and appear immediately on the <a href="our-work.html" target="_blank" style="color: var(--accent);">Our Work</a> page.</p>
+        </div>
+
+        <!-- HOW IT WORKS -->
+        <div style="padding: 1.1rem 1.4rem; background: rgba(201,170,111,0.07); border: 1px solid rgba(201,170,111,0.18); border-radius: var(--r-md); margin-bottom: 2rem;">
+          <p style="margin: 0; font-size: var(--t-sm); color: var(--text-dim); line-height: 1.7;">
+            <strong style="color: var(--accent);">How it works:</strong>
+            Create sections (e.g. "Concrete Sleeper Projects 2024"), then add images to each section.
+            Images are referenced by URL or file path — make sure images are placed in the same folder as this site, then use a relative path like <code style="background:rgba(255,255,255,0.06);padding:0.1em 0.4em;border-radius:4px;font-size:0.9em;">images/my-photo.jpg</code>.
+            Sections appear on the gallery page in the order you create them.
+          </p>
+        </div>
+
+        <!-- SECTION MANAGEMENT -->
+        <div class="admin-section">
+          <h2>Gallery Sections</h2>
+
+          <div id="admin-pw-error-sec"></div>
+          <div id="section-alert" class="admin-alert"></div>
+
+          <!-- Existing sections list -->
+          <div id="section-list" style="margin-bottom: 2rem;">
+            <p style="color: rgba(255,255,255,0.35); font-size: var(--t-sm);">Loading…</p>
+          </div>
+
+          <!-- Add section form -->
+          <div style="padding-top: 1.5rem; border-top: 1px solid var(--line);">
+            <h3 style="margin: 0 0 1.25rem; font-size: var(--t-lg); font-weight: 700;">Add New Section</h3>
+            <form id="add-section-form">
+              <div class="admin-row">
+                <div class="admin-field">
+                  <label for="sec-title">Section Title <span style="color:var(--accent);">*</span></label>
+                  <input id="sec-title" name="title" type="text" placeholder="e.g. Concrete Sleeper Projects" required>
+                </div>
+                <div class="admin-field">
+                  <label for="sec-desc">Description (optional)</label>
+                  <input id="sec-desc" name="desc" type="text" placeholder="Brief description shown below the title">
+                </div>
+              </div>
+              <button class="btn btn--primary btn--sm" type="submit">Add Section</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- IMAGE MANAGEMENT -->
+        <div class="admin-section">
+          <h2>Images</h2>
+
+          <div id="img-alert" class="admin-alert"></div>
+
+          <div class="admin-field" style="margin-bottom: 1.5rem;">
+            <label for="img-section-select">Select Section to Manage</label>
+            <select id="img-section-select">
+              <option value="">— Add a section first —</option>
+            </select>
+          </div>
+
+          <!-- Existing images in selected section -->
+          <div id="image-list" style="margin-bottom: 2rem;"></div>
+
+          <!-- Add image form -->
+          <div style="padding-top: 1.5rem; border-top: 1px solid var(--line);">
+            <h3 style="margin: 0 0 1.25rem; font-size: var(--t-lg); font-weight: 700;">Add Image to Selected Section</h3>
+            <form id="add-image-form">
+              <div class="admin-field">
+                <label for="img-url">Image URL or File Path <span style="color:var(--accent);">*</span></label>
+                <input id="img-url" name="url" type="text" placeholder="images/project-name.jpg or https://..." required>
+                <span style="font-size: var(--t-xs); color: rgba(255,255,255,0.35); margin-top:0.3rem; display:block;">Use a relative path (e.g. <code>images/wall-before.jpg</code>) if the image is in your site folder.</span>
+              </div>
+
+              <div class="admin-row">
+                <div class="admin-field">
+                  <label for="img-caption">Caption / Title</label>
+                  <input id="img-caption" name="caption" type="text" placeholder="e.g. Concrete sleeper wall — Buderim">
+                </div>
+                <div class="admin-field">
+                  <label for="img-type">Image Type</label>
+                  <select id="img-type" name="type">
+                    <option value="">No label</option>
+                    <option value="before">Before</option>
+                    <option value="after">After</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="admin-field">
+                <label for="img-desc">Description (optional)</label>
+                <textarea id="img-desc" name="img-desc" style="min-height:5rem;" placeholder="Brief description of this project or what's shown in the photo…"></textarea>
+              </div>
+
+              <button class="btn btn--primary btn--sm" type="submit">Add Image to Section</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- EXPORT / IMPORT -->
+        <div class="admin-section">
+          <h2>Backup &amp; Restore</h2>
+          <p style="margin: 0 0 1.25rem; font-size: var(--t-sm); color: var(--text-dim);">Export your gallery data as a JSON backup, or import a previously exported file to restore the gallery.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+            <button class="btn btn--secondary btn--sm" onclick="exportGallery()">Export JSON Backup</button>
+            <label class="btn btn--secondary btn--sm" style="cursor:pointer;">
+              Import JSON Backup
+              <input type="file" accept=".json" style="display:none;" onchange="importGallery(this)">
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <div style="padding: 2rem 0; text-align: center; color: rgba(255,255,255,0.25); font-size: var(--t-xs); border-top: 1px solid var(--line);">
+      RetainTech — Internal Gallery Admin &nbsp;|&nbsp; Data stored in browser localStorage
+    </div>
+  </div>
+
+  <script>
+    function exportGallery() {
+      const data = localStorage.getItem('ace_gallery_v1') || '[]';
+      const blob = new Blob([data], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      a.download = 'ace-gallery-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importGallery(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!Array.isArray(data)) throw new Error('Invalid format');
+          localStorage.setItem('ace_gallery_v1', JSON.stringify(data));
+          alert('Gallery imported successfully. Refreshing…');
+          location.reload();
+        } catch {
+          alert('Invalid file. Please use a valid gallery backup JSON.');
+        }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>

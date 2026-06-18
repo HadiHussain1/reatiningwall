@@ -1,0 +1,296 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact & Free Quote | RetainTech</title>
+  <meta name="description" content="Request a free retaining wall or landscaping quote. Specify your wall dimensions and details, or send a general enquiry. Fast response, honest advice.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- EmailJS — required for form sending. See site.js for setup instructions. -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script defer src="site.js"></script>
+</head>
+<body data-schema="organization">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div data-site-header></div>
+
+  <main id="main">
+
+    <!-- ===================== PAGE HERO ===================== -->
+    <section class="page-hero">
+      <div class="page-hero-inner">
+        <div data-reveal>
+          <span class="eyebrow">Free quote &amp; contact</span>
+          <h1>Tell us about your project and we'll shape the right solution.</h1>
+          <p>We make the quote process straightforward. Share the details below and we'll come back with practical advice, a clear recommendation and a proposal that reflects the site.</p>
+        </div>
+
+        <div class="hero-contact-grid" data-reveal>
+          <div class="hero-contact-card">
+            <div class="hcc-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 .97h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="hcc-label">Phone</div>
+              <div class="hcc-value"><a href="tel:+61401023389">0401 023 389</a></div>
+              <div style="font-size: var(--t-xs); color: rgba(255,255,255,0.4); margin-top: 0.2rem;">Mon – Fri, 7am – 5pm</div>
+            </div>
+          </div>
+          <div class="hero-contact-card">
+            <div class="hcc-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="22,6 12,13 2,6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="hcc-label">Email</div>
+              <div class="hcc-value"><a href="mailto:quotes@retaintech.com.au">quotes@retaintech.com.au</a></div>
+              <div style="font-size: var(--t-xs); color: rgba(255,255,255,0.4); margin-top: 0.2rem;">We respond within one business day</div>
+            </div>
+          </div>
+          <div class="hero-contact-card">
+            <div class="hcc-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="10" r="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="hcc-label">Service Areas</div>
+              <div class="hcc-value">Mornington Peninsula, Melbourne</div>
+              <div style="font-size: var(--t-xs); color: rgba(255,255,255,0.4); margin-top: 0.2rem;">Geelong &amp; Greater Melbourne</div>
+            </div>
+          </div>
+          <div class="hero-contact-card">
+            <div class="hcc-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 13a3 3 0 100-6 3 3 0 000 6z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="hcc-label">Free Inspections</div>
+              <div class="hcc-value">Available on request</div>
+              <div style="font-size: var(--t-xs); color: rgba(255,255,255,0.4); margin-top: 0.2rem;">We come to you, no obligation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACT FORM ===================== -->
+    <section class="section section--cream">
+      <div class="inner">
+        <div class="grid grid-2" style="align-items: start; gap: 1.75rem;">
+
+          <!-- TABBED FORM -->
+          <div data-reveal>
+            <div class="form-panel">
+              <!-- Tab buttons -->
+              <div class="form-tabs" role="tablist" aria-label="Quote type">
+                <button class="tab-btn" role="tab" aria-selected="true" aria-controls="tab-specified" data-tab="tab-specified" id="btn-specified">
+                  Specified Quote
+                </button>
+                <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-general" data-tab="tab-general" id="btn-general">
+                  General Enquiry
+                </button>
+              </div>
+
+              <div class="form-body">
+
+                <!-- ===== SPECIFIED TAB ===== -->
+                <div class="tab-pane is-active" id="tab-specified" role="tabpanel" aria-labelledby="btn-specified">
+                  <p style="margin: 0 0 1.5rem; font-size: var(--t-sm); color: var(--text-dark-dim);">Tell us about the wall you need — dimensions, type and any relevant site details. We'll use this to prepare an accurate quote.</p>
+                  <form class="form" id="form-specified" novalidate>
+
+                    <div class="form-row">
+                      <div class="field">
+                        <label class="field-required" for="sp-name">Full Name</label>
+                        <input id="sp-name" name="name" type="text" placeholder="Your full name" required autocomplete="name">
+                      </div>
+                      <div class="field">
+                        <label class="field-required" for="sp-phone">Phone Number</label>
+                        <input id="sp-phone" name="phone" type="tel" placeholder="0400 000 000" required autocomplete="tel">
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <label class="field-required" for="sp-email">Email Address</label>
+                      <input id="sp-email" name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+
+                    <div style="height: 1px; background: var(--line-light); margin: 0.5rem 0;"></div>
+                    <p style="margin: 0 0 0.75rem; font-size: var(--t-xs); text-transform: uppercase; letter-spacing: 0.09em; font-weight: 700; color: var(--text-dark-dim);">Wall Details</p>
+
+                    <div class="field">
+                      <label class="field-required" for="sp-wall-type">Wall Type</label>
+                      <select id="sp-wall-type" name="wall_type" required>
+                        <option value="">Select wall type</option>
+                        <option value="Concrete Retaining Wall">Concrete Retaining Wall</option>
+                        <option value="Concrete Sleeper Wall">Concrete Sleeper Wall</option>
+                        <option value="Timber Retaining Wall">Timber Retaining Wall</option>
+                        <option value="Not sure — need advice">Not sure — need advice</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="field">
+                        <label class="field-required" for="sp-length">Approximate Length (m)</label>
+                        <input id="sp-length" name="wall_length" type="number" min="0" step="0.5" placeholder="e.g. 12" required>
+                      </div>
+                      <div class="field">
+                        <label class="field-required" for="sp-height">Approximate Height (m)</label>
+                        <input id="sp-height" name="wall_height" type="number" min="0" step="0.1" placeholder="e.g. 1.5" required>
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="field">
+                        <label for="sp-purpose">Wall Purpose</label>
+                        <select id="sp-purpose" name="wall_purpose">
+                          <option value="">Select purpose</option>
+                          <option value="Boundary / property line">Boundary / property line</option>
+                          <option value="Slope retention">Slope retention</option>
+                          <option value="Garden bed or terracing">Garden bed / terracing</option>
+                          <option value="Driveway support">Driveway support</option>
+                          <option value="Pool surrounds">Pool surrounds</option>
+                          <option value="Development / commercial">Development / commercial</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div class="field">
+                        <label for="sp-access">Site Access</label>
+                        <select id="sp-access" name="access">
+                          <option value="">Select access level</option>
+                          <option value="Easy — open, flat access">Easy — open, flat access</option>
+                          <option value="Moderate — some restrictions">Moderate — some restrictions</option>
+                          <option value="Difficult — tight or steep">Difficult — tight or steep</option>
+                          <option value="Unsure">Unsure</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <label for="sp-notes">Additional Notes &amp; Site Details</label>
+                      <textarea id="sp-notes" name="notes" placeholder="Any extra information — existing drainage issues, soil type, photos available, timing requirements, what's above or below the wall, etc."></textarea>
+                      <span class="form-note">The more detail you share, the more accurate our quote can be.</span>
+                    </div>
+
+                    <div class="form-status" role="alert" aria-live="polite"></div>
+
+                    <button class="btn btn--primary" type="submit" style="width: 100%; justify-content: center; padding: 1rem;">
+                      Send Specified Quote Request
+                    </button>
+                    <p style="margin: 0.6rem 0 0; font-size: var(--t-xs); color: var(--text-dark-dim); text-align: center;">We'll respond within one business day. No obligation.</p>
+                  </form>
+                </div>
+
+                <!-- ===== GENERAL TAB ===== -->
+                <div class="tab-pane" id="tab-general" role="tabpanel" aria-labelledby="btn-general">
+                  <p style="margin: 0 0 1.5rem; font-size: var(--t-sm); color: var(--text-dark-dim);">Have a question, want to discuss your project, or not sure what you need yet? Send us a message and we'll be in touch.</p>
+                  <form class="form" id="form-general" novalidate>
+
+                    <div class="form-row">
+                      <div class="field">
+                        <label class="field-required" for="gen-name">Full Name</label>
+                        <input id="gen-name" name="name" type="text" placeholder="Your full name" required autocomplete="name">
+                      </div>
+                      <div class="field">
+                        <label class="field-required" for="gen-phone">Phone Number</label>
+                        <input id="gen-phone" name="phone" type="tel" placeholder="0400 000 000" required autocomplete="tel">
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <label class="field-required" for="gen-email">Email Address</label>
+                      <input id="gen-email" name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+
+                    <div class="field">
+                      <label class="field-required" for="gen-enquiry">Your Enquiry</label>
+                      <textarea id="gen-enquiry" name="enquiry" style="min-height: 12rem;" placeholder="Tell us about your project, property, location and what you're trying to achieve. Even rough details help us give better advice." required></textarea>
+                    </div>
+
+                    <div class="form-status" role="alert" aria-live="polite"></div>
+
+                    <button class="btn btn--primary" type="submit" style="width: 100%; justify-content: center; padding: 1rem;">
+                      Send Enquiry
+                    </button>
+                    <p style="margin: 0.6rem 0 0; font-size: var(--t-xs); color: var(--text-dark-dim); text-align: center;">We'll respond within one business day. No obligation.</p>
+                  </form>
+                </div>
+
+              </div><!-- /form-body -->
+            </div><!-- /form-panel -->
+          </div>
+
+          <!-- SIDEBAR -->
+          <div style="display: grid; gap: 1rem;" data-reveal>
+
+            <!-- FAQ -->
+            <div class="card">
+              <span class="card-meta">Common questions</span>
+              <div class="faq">
+                <details class="faq-item">
+                  <summary>Do you handle retaining and landscaping together?</summary>
+                  <p>Yes. We can manage the full scope — retaining walls, excavation, site preparation and landscaping — so the project feels coordinated and you deal with one team.</p>
+                </details>
+                <details class="faq-item">
+                  <summary>Can you help me choose the right wall type?</summary>
+                  <p>Absolutely. We assess the site conditions, design goals and practical requirements before recommending the best option. Just send us the details using the form.</p>
+                </details>
+                <details class="faq-item">
+                  <summary>How quickly do you respond to quotes?</summary>
+                  <p>We aim to respond to all quote requests within one business day. For larger or more complex projects, we may arrange a site visit first to give an accurate proposal.</p>
+                </details>
+                <details class="faq-item">
+                  <summary>Do you work on residential and commercial projects?</summary>
+                  <p>Yes. We support homeowners, builders and property managers with the same professional service across both residential and commercial projects.</p>
+                </details>
+                <details class="faq-item">
+                  <summary>Are site inspections available?</summary>
+                  <p>Yes — free site inspections are available on request. We'll come to you, assess the site properly and give practical advice before any commitment is required.</p>
+                </details>
+              </div>
+            </div>
+
+            <!-- IMAGE 6 — Contact inspection: contact-inspection.jpg -->
+            <div class="site-img site-img--landscape">
+              <img src="contact-inspection.jpg" alt="Site inspection consultation between contractor and homeowner on a sloped block">
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BOTTOM CTA ===================== -->
+    <section class="section section--dark">
+      <div class="inner" data-reveal>
+        <div class="grid grid-2" style="align-items: center; gap: 1.5rem;">
+          <div>
+            <span class="kicker" style="color: var(--accent);">Need it fast?</span>
+            <h2 style="margin: 0.75rem 0 0.75rem; font-size: var(--t-2xl); line-height: 1.05; letter-spacing: -0.04em; color: var(--text);">Prefer to speak directly? Call us.</h2>
+            <p style="margin: 0; color: var(--text-dim);">Our team is available Monday to Friday, 7am to 5pm. We're happy to talk through the project over the phone before committing to anything.</p>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: flex-end;">
+            <a class="btn btn--primary" href="tel:+61401023389" style="font-size: var(--t-base);">Call 0401 023 389</a>
+            <a class="btn btn--secondary" href="services.html">View Services</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div data-site-footer></div>
+</body>
+</html>
