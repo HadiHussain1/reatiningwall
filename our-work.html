@@ -335,6 +335,68 @@
       border-color: rgba(255,255,255,0.16);
     }
 
+    /* ── Before & After Slider ── */
+    .ba-section { }
+    .ba-slider {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--r-xl);
+      cursor: ew-resize;
+      user-select: none;
+      aspect-ratio: 16/9;
+      background: #0b0d11;
+      touch-action: none;
+    }
+    .ba-before, .ba-after { position: absolute; inset: 0; }
+    .ba-before img, .ba-after img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+    .ba-after { clip-path: inset(0 0 0 50%); }
+    .ba-divider {
+      position: absolute; top: 0; bottom: 0; left: 50%;
+      width: 3px;
+      background: rgba(255,255,255,0.92);
+      transform: translateX(-50%);
+      pointer-events: none;
+      box-shadow: 0 0 16px rgba(0,0,0,0.5);
+    }
+    .ba-handle {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2.75rem; height: 2.75rem;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 0 0 3px rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      color: #111;
+    }
+    .ba-label {
+      position: absolute; bottom: 0.85rem;
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.68rem; font-weight: 800;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.15);
+      pointer-events: none;
+    }
+    .ba-label--before { left: 0.85rem; }
+    .ba-label--after  { right: 0.85rem; background: var(--accent); color: #111; border-color: var(--accent); }
+    .ba-captions {
+      display: flex; justify-content: space-between; gap: 1rem;
+      margin-top: 0.75rem; padding: 0 0.2rem;
+    }
+    .ba-captions span { font-size: var(--t-xs); color: rgba(255,255,255,0.38); }
+    .ba-meta { margin-top: 0.4rem; }
+    .ba-location { font-size: var(--t-xs); color: var(--accent); display: inline-block; margin-bottom: 0.25rem; }
+
+    /* Gallery card entrance animation */
+    @keyframes gCardIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+    .gphoto-card { animation: gCardIn 360ms ease both; }
+
+    /* Type badge on jump nav */
+    .jump-type { font-size: 0.6rem; opacity: 0.55; margin-left: 0.25rem; }
+
     @media (max-width: 820px) {
       .gphoto-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .gphoto-grid.cols-1 { grid-template-columns: 1fr; }
@@ -342,12 +404,15 @@
       .gallery-hero-strip .strip-img:last-child { display: none; }
       .gsection-head { flex-direction: column; gap: 0.5rem; }
       .lightbox-nav { display: none; }
+      .ba-slider { aspect-ratio: 4/3; }
     }
 
     @media (max-width: 540px) {
       .gphoto-grid, .gphoto-grid.cols-2 { grid-template-columns: 1fr; }
       .gallery-hero-strip { grid-template-columns: 1fr; }
       .gallery-hero-strip .strip-img:not(:first-child) { display: none; }
+      .ba-slider { aspect-ratio: 4/3; border-radius: var(--r-lg); }
+      .ba-handle { width: 2.2rem; height: 2.2rem; }
     }
   </style>
 </head>
@@ -430,175 +495,211 @@
   <div data-site-footer></div>
 
   <script>
-  /* Wrapped in IIFE so const/function names don't collide with site.js globals */
   (function () {
-    /* ── Gallery renderer for our-work.html ─────────────────────────
-       Reads from localStorage key 'ace_gallery_v1' (written by admin).
-       Falls back to a polished empty state if no data exists yet.
-    ──────────────────────────────────────────────────────────────── */
-
+    'use strict';
     const GALLERY_KEY = 'ace_gallery_v1';
 
-    function getData() {
-      try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; }
-      catch { return []; }
-    }
+    function getData() { try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; } catch { return []; } }
+    function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
 
-    function esc(s) {
-      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    /* Flat list of all images across all sections for lightbox navigation */
+    /* ── Lightbox ── */
     let allImages = [];
     let lbIndex   = 0;
 
     function openLightbox(idx) {
       if (!allImages.length) return;
       lbIndex = idx;
-      const img  = allImages[idx];
-      const lb   = document.getElementById('lightbox');
-      document.getElementById('lb-img').src   = img.url || '';
-      document.getElementById('lb-img').alt   = img.caption || 'Project photo';
+      const img = allImages[idx];
+      document.getElementById('lb-img').src = img.url || '';
+      document.getElementById('lb-img').alt = img.caption || 'Project photo';
       document.getElementById('lb-title').textContent = img.caption || '';
       document.getElementById('lb-desc').textContent  = img.description || '';
-      lb.classList.add('is-open');
+      document.getElementById('lightbox').classList.add('is-open');
       document.body.style.overflow = 'hidden';
     }
-
     function closeLightbox() {
       document.getElementById('lightbox').classList.remove('is-open');
       document.body.style.overflow = '';
     }
-
-    function lbNav(dir) {
-      lbIndex = (lbIndex + dir + allImages.length) % allImages.length;
-      openLightbox(lbIndex);
-    }
+    function lbNav(dir) { lbIndex = (lbIndex + dir + allImages.length) % allImages.length; openLightbox(lbIndex); }
 
     document.getElementById('lb-close').addEventListener('click', closeLightbox);
     document.getElementById('lb-prev').addEventListener('click', () => lbNav(-1));
     document.getElementById('lb-next').addEventListener('click', () => lbNav(1));
-    document.getElementById('lightbox').addEventListener('click', function(e) {
-      if (e.target === this) closeLightbox();
-    });
+    document.getElementById('lightbox').addEventListener('click', function (e) { if (e.target === this) closeLightbox(); });
     document.addEventListener('keydown', e => {
-      const lb = document.getElementById('lightbox');
-      if (!lb.classList.contains('is-open')) return;
-      if (e.key === 'Escape')      closeLightbox();
-      if (e.key === 'ArrowLeft')   lbNav(-1);
-      if (e.key === 'ArrowRight')  lbNav(1);
+      if (!document.getElementById('lightbox').classList.contains('is-open')) return;
+      if (e.key === 'Escape')     closeLightbox();
+      if (e.key === 'ArrowLeft')  lbNav(-1);
+      if (e.key === 'ArrowRight') lbNav(1);
     });
 
+    /* ── Before & After slider ── */
+    function initBASliders() {
+      document.querySelectorAll('[data-ba-slider]').forEach(slider => {
+        const after   = slider.querySelector('.ba-after');
+        const divider = slider.querySelector('.ba-divider');
+        let dragging  = false;
+
+        function setPos(clientX) {
+          const r   = slider.getBoundingClientRect();
+          const pct = Math.max(3, Math.min(97, ((clientX - r.left) / r.width) * 100));
+          after.style.clipPath   = `inset(0 0 0 ${pct}%)`;
+          divider.style.left     = pct + '%';
+        }
+
+        slider.addEventListener('mousedown',  e => { dragging = true; setPos(e.clientX); e.preventDefault(); });
+        slider.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
+        window.addEventListener('mousemove',  e => { if (dragging) setPos(e.clientX); });
+        window.addEventListener('touchmove',  e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+        window.addEventListener('mouseup',    () => dragging = false);
+        window.addEventListener('touchend',   () => dragging = false);
+      });
+    }
+
+    /* ── Build before-after section HTML ── */
+    function buildBASection(section) {
+      return `
+        <div class="gsection ba-section" id="gs-${esc(section.id)}" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent);">Before &amp; After</span>
+              <h2>${esc(section.title)}</h2>
+              ${section.description ? `<p>${esc(section.description)}</p>` : ''}
+            </div>
+            <span class="gsection-count" style="display:flex;align-items:center;gap:0.35rem;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l-6-6 6-6M15 6l6 6-6 6"/></svg>
+              Drag to compare
+            </span>
+          </div>
+          <div class="ba-slider" data-ba-slider>
+            <div class="ba-before">
+              <img src="${esc(section.before.url)}" alt="Before: ${esc(section.before.caption || section.title)}" loading="lazy">
+              <span class="ba-label ba-label--before">Before</span>
+            </div>
+            <div class="ba-after" style="clip-path:inset(0 0 0 50%);">
+              <img src="${esc(section.after.url)}" alt="After: ${esc(section.after.caption || section.title)}" loading="lazy">
+              <span class="ba-label ba-label--after">After</span>
+            </div>
+            <div class="ba-divider" style="left:50%;">
+              <div class="ba-handle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l-6-6 6-6M15 6l6 6-6 6"/></svg>
+              </div>
+            </div>
+          </div>
+          ${section.before.caption || section.after.caption || section.location ? `
+          <div class="ba-meta">
+            ${section.location ? `<span class="ba-location">📍 ${esc(section.location)}</span>` : ''}
+            ${(section.before.caption || section.after.caption) ? `
+            <div class="ba-captions">
+              <span>${esc(section.before.caption || '')}</span>
+              <span>${esc(section.after.caption || '')}</span>
+            </div>` : ''}
+          </div>` : ''}
+        </div>`;
+    }
+
+    /* ── Build gallery section HTML ── */
+    function buildGallerySection(section, globalImgIdx) {
+      const imgs   = (section.images || []).filter(i => i.url);
+      const colCls = imgs.length === 1 ? 'cols-1' : imgs.length === 2 ? 'cols-2' : '';
+
+      const cards = imgs.map((img, ci) => {
+        const idx = globalImgIdx.value++;
+        allImages.push(img);
+        return `
+          <article class="gphoto-card" data-lb-idx="${idx}" style="animation-delay:${ci * 55}ms" tabindex="0" role="button" aria-label="View photo${img.caption ? ': ' + img.caption : ''}">
+            <div class="gphoto-img">
+              <img src="${esc(img.url)}" alt="${esc(img.caption || 'Project photo')}" loading="lazy">
+            </div>
+            ${img.caption ? `<div class="gphoto-body"><h4>${esc(img.caption)}</h4></div>` : ''}
+          </article>`;
+      }).join('');
+
+      return `
+        <div class="gsection" id="gs-${esc(section.id)}" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent);">Gallery</span>
+              <h2>${esc(section.title)}</h2>
+              ${section.description ? `<p>${esc(section.description)}</p>` : ''}
+            </div>
+            <span class="gsection-count">${imgs.length} photo${imgs.length !== 1 ? 's' : ''}</span>
+          </div>
+          ${imgs.length
+            ? `<div class="gphoto-grid ${colCls}">${cards}</div>`
+            : `<p style="color:var(--text-dim);font-size:var(--t-sm);">No photos in this section yet.</p>`}
+        </div>`;
+    }
+
+    /* ── Main render ── */
     function renderGallery() {
-      const data      = getData();
-      const output    = document.getElementById('gallery-output');
-      const jumpWrap  = document.getElementById('gallery-jump');
-      const jumpNav   = document.getElementById('gallery-jump-nav');
+      const data     = getData();
+      const output   = document.getElementById('gallery-output');
+      const jumpWrap = document.getElementById('gallery-jump');
+      const jumpNav  = document.getElementById('gallery-jump-nav');
 
       allImages = [];
 
-      /* ── Empty state ── */
-      if (!data.length || data.every(s => !(s.images && s.images.length))) {
+      const hasContent = data.some(s =>
+        (s.type === 'before-after' && s.before && s.after) ||
+        (s.type === 'gallery' && s.images && s.images.length)
+      );
+
+      if (!data.length || !hasContent) {
         output.innerHTML = `
           <div class="gallery-empty-state">
             <div class="gallery-empty-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="3"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
             <h3>Gallery coming soon</h3>
-            <p>Our project photos are on their way. Check back soon for before and after shots, completed works and detailed project breakdowns.</p>
+            <p>Our project photos are on their way. Check back soon for before and after comparisons and completed project galleries.</p>
           </div>`;
         return;
       }
 
-      /* ── Build flat image list for lightbox ── */
-      data.forEach(section => {
-        (section.images || []).forEach(img => {
-          if (img.url) allImages.push(img);
-        });
-      });
-
-      /* ── Jump nav (only if more than 1 section) ── */
+      /* Jump nav */
       if (data.length > 1) {
         jumpWrap.style.display = '';
-        jumpNav.innerHTML = data.map(s =>
-          `<a class="gallery-jump-btn" href="#gs-${esc(s.id)}">${esc(s.title)}</a>`
-        ).join('');
+        jumpNav.innerHTML = data.map(s => {
+          const typeLabel = s.type === 'before-after' ? '⟷' : '⊞';
+          return `<a class="gallery-jump-btn" href="#gs-${esc(s.id)}">${typeLabel} ${esc(s.title)}</a>`;
+        }).join('');
       }
 
-      /* ── Sections ── */
-      let globalImgIdx = 0;
-      output.innerHTML = data.map((section, si) => {
-        const imgs   = (section.images || []).filter(i => i.url);
-        const colCls = imgs.length === 1 ? 'cols-1' : imgs.length === 2 ? 'cols-2' : '';
-        const sectionNum = String(si + 1).padStart(2, '0');
-
-        const cards = imgs.map(img => {
-          const idx    = globalImgIdx++;
-          const badge  = img.type
-            ? `<span class="gphoto-badge gphoto-badge--${esc(img.type)}">${img.type === 'before' ? 'Before' : 'After'}</span>`
-            : '';
-          return `
-            <article class="gphoto-card" data-lb-idx="${idx}" tabindex="0" role="button" aria-label="View photo${img.caption ? ': ' + img.caption : ''}">
-              <div class="gphoto-img">
-                <img src="${esc(img.url)}" alt="${esc(img.caption || 'Project photo')}" loading="lazy">
-                ${badge}
-              </div>
-              ${img.caption || img.description ? `
-              <div class="gphoto-body">
-                ${img.caption     ? `<h4>${esc(img.caption)}</h4>` : ''}
-                ${img.description ? `<p>${esc(img.description)}</p>` : ''}
-              </div>` : ''}
-            </article>`;
-        }).join('');
-
-        return `
-          <div class="gsection" id="gs-${esc(section.id)}" data-reveal>
-            <div class="gsection-head">
-              <div class="gsection-title-block">
-                <span class="kicker" style="color:var(--accent);">Section ${sectionNum}</span>
-                <h2>${esc(section.title)}</h2>
-                ${section.description ? `<p>${esc(section.description)}</p>` : ''}
-              </div>
-              <span class="gsection-count">${imgs.length} photo${imgs.length !== 1 ? 's' : ''}</span>
-            </div>
-            ${imgs.length
-              ? `<div class="gphoto-grid ${colCls}">${cards}</div>`
-              : `<p style="color:var(--text-dim);font-size:var(--t-sm);">No photos in this section yet.</p>`
-            }
-          </div>`;
+      /* Render sections */
+      const imgIdx = { value: 0 };
+      output.innerHTML = data.map(section => {
+        if (section.type === 'before-after') return buildBASection(section);
+        if (section.type === 'gallery')      return buildGallerySection(section, imgIdx);
+        return '';
       }).join('');
 
-      /* ── Wire lightbox clicks ── */
+      /* Wire lightbox on gallery cards */
       output.querySelectorAll('[data-lb-idx]').forEach(el => {
         const idx = Number(el.dataset.lbIdx);
         el.addEventListener('click', () => openLightbox(idx));
         el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(idx); } });
       });
 
-      /* ── Re-trigger reveal on dynamically added sections ── */
+      /* Init BA sliders */
+      initBASliders();
+
+      /* Reveal animation */
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver(entries => {
           entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
-        }, { threshold: 0.1 });
+        }, { threshold: 0.08 });
         output.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
       } else {
         output.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('is-visible'));
       }
     }
 
-    /* Render as soon as DOM is ready (site.js DOMContentLoaded also fires,
-       but we render here directly to avoid timing issues with late JS load) */
     document.addEventListener('DOMContentLoaded', renderGallery);
+    window.addEventListener('storage', e => { if (e.key === GALLERY_KEY) renderGallery(); });
 
-    /* Also refresh if admin updates data in another tab */
-    window.addEventListener('storage', e => {
-      if (e.key === GALLERY_KEY) renderGallery();
-    });
-  })(); /* end IIFE */
+  })();
   </script>
 </body>
 </html>

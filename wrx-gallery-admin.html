@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -9,168 +9,296 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script defer src="site.js"></script>
   <style>
-    /* Admin-only body override — no shared header needed */
-    body.admin-body { background: #0b0d11; color: var(--text); min-height: 100vh; }
-    .admin-page-wrap { min-height: 100vh; }
+    body { background: var(--bg); color: var(--text); }
+
+    /* ── Gate ── */
+    .ga-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .ga-gate-box { width: 100%; max-width: 24rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 2.5rem; text-align: center; }
+    .ga-gate-box h1 { margin: 1.25rem 0 0.4rem; font-size: var(--t-2xl); letter-spacing: -0.04em; }
+    .ga-gate-box p  { margin: 0 0 1.75rem; color: var(--text-dim); font-size: var(--t-sm); }
+    .ga-gate-badge  { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--accent); font-size: var(--t-xs); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+    .ga-gate-badge span { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--accent); display: inline-block; }
+    .ga-gate-err { color: #e06060; font-size: var(--t-xs); margin-bottom: 0.75rem; }
+
+    /* ── Header ── */
+    .ga-header { position: sticky; top: 0; background: rgba(11,13,17,0.96); backdrop-filter: blur(20px); border-bottom: 1px solid var(--line); z-index: 100; }
+    .ga-header .inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 0; flex-wrap: wrap; }
+    .ga-header-left { display: flex; align-items: center; gap: 0.85rem; }
+    .ga-header-right { display: flex; gap: 0.6rem; align-items: center; }
+    .ga-brand { font-weight: 800; color: var(--text); font-size: var(--t-base); letter-spacing: -0.03em; }
+    .ga-badge-pill { padding: 0.25rem 0.75rem; background: rgba(201,170,111,0.12); border: 1px solid rgba(201,170,111,0.2); border-radius: 999px; font-size: var(--t-xs); color: var(--accent); font-weight: 600; letter-spacing: 0.06em; }
+
+    /* ── Folder bar ── */
+    .ga-folder-bar { border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+    .ga-folder-bar .inner { display: flex; align-items: center; gap: 1rem; padding: 0.65rem 0; flex-wrap: wrap; }
+    .ga-folder-active { display: flex; align-items: center; gap: 0.5rem; font-size: var(--t-sm); color: var(--text-dim); flex: 1; }
+    .ga-folder-active strong { color: var(--accent); }
+    .ga-folder-hint  { display: flex; align-items: center; gap: 0.5rem; font-size: var(--t-sm); color: var(--text-dim); flex: 1; }
+    .ga-folder-warn  { padding: 0.45rem 0.85rem; background: rgba(220,180,50,0.08); border: 1px solid rgba(220,180,50,0.18); border-radius: var(--r-md); font-size: var(--t-xs); color: #e0c060; }
+
+    /* ── Main ── */
+    .ga-main { padding: 2.5rem 0 5rem; }
+
+    /* ── Tabs ── */
+    .ga-tabs { display: flex; gap: 0.3rem; background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 0.28rem; margin-bottom: 2.5rem; width: fit-content; }
+    .ga-tab { padding: 0.6rem 1.5rem; border-radius: var(--r-md); font-size: var(--t-sm); font-weight: 600; color: rgba(255,255,255,0.45); cursor: pointer; transition: all 180ms ease; border: 1px solid transparent; background: none; display: flex; align-items: center; gap: 0.5rem; }
+    .ga-tab.is-active { background: rgba(255,255,255,0.08); color: var(--text); border-color: var(--line); box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+    .ga-tab:hover:not(.is-active) { color: rgba(255,255,255,0.75); }
+    .ga-panel[hidden] { display: none; }
+
+    /* ── Section list cards ── */
+    .ga-card { background: rgba(255,255,255,0.035); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 1.25rem 1.4rem; margin-bottom: 0.85rem; }
+    .ga-card--ba { display: grid; gap: 1rem; }
+    .ga-card--gallery { display: grid; gap: 0.85rem; }
+    .ga-pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.75rem; align-items: center; }
+    .ga-thumb { aspect-ratio: 16/9; border-radius: var(--r-lg); overflow: hidden; background: #0f1117; position: relative; }
+    .ga-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ga-thumb-label { position: absolute; bottom: 0.5rem; left: 0.5rem; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.15); }
+    .ga-thumb-label.is-after { background: var(--accent); color: #111; border-color: var(--accent); }
+    .ga-arrow { color: rgba(255,255,255,0.25); font-size: 1.5rem; text-align: center; }
+    .ga-card-meta h3 { margin: 0 0 0.25rem; font-size: var(--t-base); font-weight: 700; color: var(--text); }
+    .ga-card-meta p  { margin: 0.3rem 0 0; font-size: var(--t-xs); color: var(--text-dim); }
+    .ga-loc { font-size: var(--t-xs); color: var(--accent); display: block; margin-bottom: 0.2rem; }
+    .ga-caps { display: flex; gap: 1rem; margin-top: 0.4rem; }
+    .ga-caps span { font-size: var(--t-xs); color: rgba(255,255,255,0.3); }
+    .ga-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); }
+    .ga-count-tag { font-size: var(--t-xs); color: var(--accent); font-weight: 600; }
+    .ga-actions { display: flex; gap: 0.5rem; }
+    .ga-strip { display: flex; gap: 0.35rem; height: 4rem; overflow: hidden; border-radius: var(--r-md); }
+    .ga-strip img { width: 4rem; height: 100%; object-fit: cover; border-radius: var(--r-sm); flex-shrink: 0; }
+    .ga-strip-more { display: flex; align-items: center; justify-content: center; width: 3.5rem; height: 100%; background: rgba(255,255,255,0.05); border-radius: var(--r-sm); font-size: var(--t-xs); color: rgba(255,255,255,0.35); font-weight: 700; flex-shrink: 0; }
+    .btn-del { background: rgba(220,60,60,0.1) !important; color: #e07070 !important; border-color: rgba(220,60,60,0.2) !important; }
+    .btn-del:hover { background: rgba(220,60,60,0.2) !important; }
+
+    /* ── Manage images panel ── */
+    .ga-manager { border-top: 1px solid var(--line); padding-top: 1.1rem; margin-top: 0.5rem; }
+    .ga-manager h4 { margin: 0 0 0.85rem; font-size: var(--t-sm); font-weight: 700; color: var(--text); }
+    .ga-mgr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); gap: 0.6rem; margin-bottom: 1rem; }
+    .ga-mgr-item { border-radius: var(--r-md); overflow: hidden; background: #111; border: 1px solid var(--line); position: relative; }
+    .ga-mgr-item img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .ga-mgr-cap { width: 100%; padding: 0.3rem 0.5rem; background: rgba(0,0,0,0.5); border: none; color: rgba(255,255,255,0.65); font-size: 0.62rem; font-family: inherit; border-top: 1px solid var(--line); outline: none; }
+    .ga-mgr-cap:focus { background: rgba(0,0,0,0.8); color: #fff; }
+    .ga-mgr-del { position: absolute; top: 0.3rem; right: 0.3rem; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: rgba(0,0,0,0.7); color: #fff; font-size: 0.8rem; border: none; cursor: pointer; display: grid; place-items: center; line-height: 1; }
+
+    /* ── Drop zones ── */
+    .dz { border: 2px dashed rgba(255,255,255,0.13); border-radius: var(--r-xl); cursor: pointer; transition: border-color 180ms, background 180ms; position: relative; overflow: hidden; }
+    .dz:hover, .dz.dz-over { border-color: var(--accent); background: rgba(201,170,111,0.04); }
+    .dz-content { padding: 2.75rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; pointer-events: none; }
+    .dz-icon { width: 3rem; height: 3rem; border-radius: 50%; background: rgba(201,170,111,0.1); border: 1px solid rgba(201,170,111,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 0.25rem; }
+    .dz-icon svg { stroke: var(--accent); }
+    .dz-content p { margin: 0; font-size: var(--t-sm); color: var(--text-dim); }
+    .dz-content strong { color: var(--text); }
+    .dz-sub { font-size: var(--t-xs) !important; color: rgba(255,255,255,0.28) !important; }
+    .dz-link { color: var(--accent); text-decoration: underline; cursor: pointer; }
+    .dz-preview { position: relative; aspect-ratio: 16/9; }
+    .dz-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .dz-clear { position: absolute; top: 0.6rem; right: 0.6rem; width: 2rem; height: 2rem; border-radius: 50%; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 1rem; display: grid; place-items: center; cursor: pointer; z-index: 2; }
+    .dz-label-above { font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.4rem; display: block; }
+    .dz--sm .dz-content { padding: 1.25rem; }
+    .dz-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* ── Queue (gallery pending images) ── */
+    .ga-queue-hdr { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: var(--t-sm); color: var(--text-dim); margin-bottom: 0.65rem; }
+    .ga-queue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); gap: 0.45rem; }
+    .ga-queue-item { position: relative; aspect-ratio: 1; border-radius: var(--r-md); overflow: hidden; background: #111; }
+    .ga-queue-item img { width: 100%; height: 100%; object-fit: cover; }
+    .ga-queue-del { position: absolute; top: 0.2rem; right: 0.2rem; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.78rem; border: none; cursor: pointer; display: grid; place-items: center; line-height: 1; }
+    .ga-queue-fname { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.18rem 0.28rem; background: rgba(0,0,0,0.7); font-size: 0.52rem; color: rgba(255,255,255,0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Add section boxes ── */
+    .ga-add-box { background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 1.75rem; margin-top: 2rem; }
+    .ga-add-box h3 { margin: 0 0 1.5rem; font-size: var(--t-xl); letter-spacing: -0.03em; color: var(--text); }
+    .ga-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 640px) { .ga-field-row { grid-template-columns: 1fr; } .dz-pair { grid-template-columns: 1fr; } }
+
+    /* ── Alert ── */
+    .ga-alert { padding: 0.75rem 1rem; border-radius: var(--r-md); font-size: var(--t-sm); font-weight: 500; margin-bottom: 1rem; }
+    .ga-alert--ok  { background: rgba(40,160,80,0.12); border: 1px solid rgba(40,160,80,0.28); color: #5dc98a; }
+    .ga-alert--err { background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.22); color: #e07070; }
+
+    /* ── Empty / dividers ── */
+    .ga-empty { color: rgba(255,255,255,0.28); font-size: var(--t-sm); padding: 0.5rem 0 1rem; }
+    .ga-sections-label { font-size: var(--t-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 0.85rem; }
+    .ga-sep { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
+    .ga-backup { margin-top: 2.5rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--r-xl); }
+    .ga-backup h3 { margin: 0 0 0.4rem; font-size: var(--t-lg); font-weight: 700; color: var(--text); }
+    .ga-backup p  { margin: 0 0 1.1rem; font-size: var(--t-sm); color: var(--text-dim); }
+    .ga-backup-btns { display: flex; gap: 0.65rem; flex-wrap: wrap; }
   </style>
 </head>
-<body class="admin-body">
+<body>
 
   <!-- ===================== LOGIN GATE ===================== -->
-  <div class="admin-login" id="admin-login">
-    <div class="admin-login-box">
-      <div style="margin-bottom: 1.5rem;">
-        <span style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent); font-size: var(--t-xs); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;">
-          <span style="width:0.45rem;height:0.45rem;border-radius:50%;background:var(--accent);display:inline-block;"></span>
-          RetainTech
-        </span>
-      </div>
+  <div class="ga-gate" id="ga-gate">
+    <div class="ga-gate-box">
+      <div class="ga-gate-badge"><span></span> RetainTech</div>
       <h1>Gallery Admin</h1>
       <p>Enter the admin password to manage the gallery.</p>
-
-      <div class="admin-field" style="text-align: left;">
-        <label for="admin-pw">Password</label>
-        <input id="admin-pw" type="password" placeholder="Enter password" autocomplete="current-password">
+      <div class="admin-field" style="text-align:left;">
+        <label for="ga-pw">Password</label>
+        <input id="ga-pw" type="password" placeholder="Enter password" autocomplete="current-password">
       </div>
-      <div id="admin-pw-error" style="display:none; color:#c03030; font-size: var(--t-xs); margin-bottom: 0.75rem; text-align: left;"></div>
-      <button id="admin-pw-btn" class="btn btn--primary" style="width:100%; justify-content:center;">
-        Unlock Gallery Admin
-      </button>
-      <p style="margin: 1.5rem 0 0; font-size: var(--t-xs); color: rgba(255,255,255,0.28);">This page is private. The URL is not linked anywhere on the public site.</p>
+      <p class="ga-gate-err" id="ga-pw-err" hidden></p>
+      <button id="ga-pw-btn" class="btn btn--primary" style="width:100%;justify-content:center;">Unlock Admin</button>
+      <p style="margin:1.5rem 0 0;font-size:var(--t-xs);color:rgba(255,255,255,0.22);">This page is private and not linked anywhere on the public site.</p>
     </div>
   </div>
 
   <!-- ===================== ADMIN APP ===================== -->
-  <div id="admin-app" class="admin-page-wrap">
+  <div id="ga-app" hidden>
 
-    <!-- Admin Header -->
-    <header class="admin-header">
+    <header class="ga-header">
       <div class="inner">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <a href="index.html" style="color: rgba(255,255,255,0.5); font-size: var(--t-sm); transition: color 160ms;">← Back to site</a>
-          <span style="color: rgba(255,255,255,0.15);">|</span>
-          <span class="admin-badge">Gallery Admin</span>
+        <div class="ga-header-left">
+          <span class="ga-brand">RetainTech</span>
+          <span class="ga-badge-pill">Gallery Admin</span>
         </div>
-        <div style="display: flex; gap: 0.75rem; align-items: center;">
-          <a href="our-work.html" target="_blank" class="btn btn--secondary btn--sm">Preview Gallery ↗</a>
-          <button class="btn btn--sm" style="background:rgba(220,60,60,0.15);color:#e06060;border:1px solid rgba(220,60,60,0.25);"
-            onclick="if(confirm('Clear ALL gallery data? This cannot be undone.')){localStorage.removeItem('ace_gallery_v1');location.reload();}">
-            Clear All Data
-          </button>
+        <div class="ga-header-right">
+          <a href="index.html" class="btn btn--secondary btn--sm">← Back to site</a>
+          <a href="our-work.html" target="_blank" class="btn btn--secondary btn--sm">Preview ↗</a>
+          <button class="btn btn--sm btn-del" onclick="if(confirm('Clear ALL gallery data?')){localStorage.removeItem('ace_gallery_v1');location.reload();}">Clear All</button>
         </div>
       </div>
     </header>
 
-    <main class="admin-main">
+    <!-- Folder bar -->
+    <div class="ga-folder-bar" id="ga-folder-bar">
+      <div class="inner"><span class="ga-folder-hint">Loading…</span></div>
+    </div>
+
+    <main class="ga-main">
       <div class="inner">
 
-        <div style="margin-bottom: 2.5rem;">
-          <h1 style="margin: 0 0 0.35rem; font-size: var(--t-2xl); letter-spacing: -0.04em;">Gallery Manager</h1>
-          <p style="margin: 0; color: var(--text-dim); font-size: var(--t-sm);">Manage gallery sections and images. All changes are saved to your browser's local storage and appear immediately on the <a href="our-work.html" target="_blank" style="color: var(--accent);">Our Work</a> page.</p>
+        <!-- Tab switcher -->
+        <div class="ga-tabs">
+          <button class="ga-tab is-active" data-tab="ba">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/></svg>
+            Before &amp; After
+          </button>
+          <button class="ga-tab" data-tab="gallery">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            General Gallery
+          </button>
         </div>
 
-        <!-- HOW IT WORKS -->
-        <div style="padding: 1.1rem 1.4rem; background: rgba(201,170,111,0.07); border: 1px solid rgba(201,170,111,0.18); border-radius: var(--r-md); margin-bottom: 2rem;">
-          <p style="margin: 0; font-size: var(--t-sm); color: var(--text-dim); line-height: 1.7;">
-            <strong style="color: var(--accent);">How it works:</strong>
-            Create sections (e.g. "Concrete Sleeper Projects 2024"), then add images to each section.
-            Images are referenced by URL or file path — make sure images are placed in the same folder as this site, then use a relative path like <code style="background:rgba(255,255,255,0.06);padding:0.1em 0.4em;border-radius:4px;font-size:0.9em;">images/my-photo.jpg</code>.
-            Sections appear on the gallery page in the order you create them.
-          </p>
-        </div>
+        <!-- ===== BEFORE & AFTER PANEL ===== -->
+        <div class="ga-panel" id="panel-ba">
+          <div class="ga-sections-label">Existing Before &amp; After Sections</div>
+          <div id="ba-list"></div>
 
-        <!-- SECTION MANAGEMENT -->
-        <div class="admin-section">
-          <h2>Gallery Sections</h2>
-
-          <div id="admin-pw-error-sec"></div>
-          <div id="section-alert" class="admin-alert"></div>
-
-          <!-- Existing sections list -->
-          <div id="section-list" style="margin-bottom: 2rem;">
-            <p style="color: rgba(255,255,255,0.35); font-size: var(--t-sm);">Loading…</p>
-          </div>
-
-          <!-- Add section form -->
-          <div style="padding-top: 1.5rem; border-top: 1px solid var(--line);">
-            <h3 style="margin: 0 0 1.25rem; font-size: var(--t-lg); font-weight: 700;">Add New Section</h3>
-            <form id="add-section-form">
-              <div class="admin-row">
+          <div class="ga-add-box">
+            <h3>Add Before &amp; After Section</h3>
+            <div id="ba-alert" class="ga-alert" hidden></div>
+            <form id="form-ba" autocomplete="off">
+              <div class="ga-field-row">
                 <div class="admin-field">
-                  <label for="sec-title">Section Title <span style="color:var(--accent);">*</span></label>
-                  <input id="sec-title" name="title" type="text" placeholder="e.g. Concrete Sleeper Projects" required>
+                  <label for="ba-title">Section Title <span style="color:var(--accent)">*</span></label>
+                  <input id="ba-title" type="text" placeholder="e.g. Fitzroy — Concrete Sleeper Wall" required>
                 </div>
                 <div class="admin-field">
-                  <label for="sec-desc">Description (optional)</label>
-                  <input id="sec-desc" name="desc" type="text" placeholder="Brief description shown below the title">
+                  <label for="ba-location">Location (optional)</label>
+                  <input id="ba-location" type="text" placeholder="e.g. St Kilda, Melbourne">
                 </div>
               </div>
-              <button class="btn btn--primary btn--sm" type="submit">Add Section</button>
+              <div class="admin-field">
+                <label for="ba-desc">Description (optional)</label>
+                <textarea id="ba-desc" style="min-height:4rem;" placeholder="Brief project description…"></textarea>
+              </div>
+
+              <!-- Drop zones -->
+              <div class="dz-pair" style="margin:1.5rem 0;">
+                <div>
+                  <span class="dz-label-above">Before Photo <span style="color:var(--accent)">*</span></span>
+                  <div class="dz" id="dz-before">
+                    <div class="dz-content">
+                      <div class="dz-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                      <p><strong>Before</strong> photo</p>
+                      <p class="dz-sub">Drop here or <span class="dz-link">browse</span></p>
+                    </div>
+                    <div class="dz-preview" hidden>
+                      <img alt="Before preview">
+                      <button type="button" class="dz-clear">×</button>
+                    </div>
+                    <input type="file" class="dz-input" accept="image/*" hidden>
+                  </div>
+                  <div class="admin-field" style="margin-top:0.65rem;">
+                    <label for="ba-before-cap">Before caption</label>
+                    <input id="ba-before-cap" type="text" placeholder="e.g. Failing timber wall, soil subsidence">
+                  </div>
+                </div>
+                <div>
+                  <span class="dz-label-above">After Photo <span style="color:var(--accent)">*</span></span>
+                  <div class="dz" id="dz-after">
+                    <div class="dz-content">
+                      <div class="dz-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                      <p><strong>After</strong> photo</p>
+                      <p class="dz-sub">Drop here or <span class="dz-link">browse</span></p>
+                    </div>
+                    <div class="dz-preview" hidden>
+                      <img alt="After preview">
+                      <button type="button" class="dz-clear">×</button>
+                    </div>
+                    <input type="file" class="dz-input" accept="image/*" hidden>
+                  </div>
+                  <div class="admin-field" style="margin-top:0.65rem;">
+                    <label for="ba-after-cap">After caption</label>
+                    <input id="ba-after-cap" type="text" placeholder="e.g. Finished 1.2m concrete sleeper wall">
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn--primary">Add Before &amp; After Section</button>
             </form>
           </div>
         </div>
 
-        <!-- IMAGE MANAGEMENT -->
-        <div class="admin-section">
-          <h2>Images</h2>
+        <!-- ===== GENERAL GALLERY PANEL ===== -->
+        <div class="ga-panel" id="panel-gallery" hidden>
+          <div class="ga-sections-label">Existing Gallery Sections</div>
+          <div id="gal-list"></div>
 
-          <div id="img-alert" class="admin-alert"></div>
-
-          <div class="admin-field" style="margin-bottom: 1.5rem;">
-            <label for="img-section-select">Select Section to Manage</label>
-            <select id="img-section-select">
-              <option value="">— Add a section first —</option>
-            </select>
-          </div>
-
-          <!-- Existing images in selected section -->
-          <div id="image-list" style="margin-bottom: 2rem;"></div>
-
-          <!-- Add image form -->
-          <div style="padding-top: 1.5rem; border-top: 1px solid var(--line);">
-            <h3 style="margin: 0 0 1.25rem; font-size: var(--t-lg); font-weight: 700;">Add Image to Selected Section</h3>
-            <form id="add-image-form">
-              <div class="admin-field">
-                <label for="img-url">Image URL or File Path <span style="color:var(--accent);">*</span></label>
-                <input id="img-url" name="url" type="text" placeholder="images/project-name.jpg or https://..." required>
-                <span style="font-size: var(--t-xs); color: rgba(255,255,255,0.35); margin-top:0.3rem; display:block;">Use a relative path (e.g. <code>images/wall-before.jpg</code>) if the image is in your site folder.</span>
-              </div>
-
-              <div class="admin-row">
+          <div class="ga-add-box">
+            <h3>Add Gallery Section</h3>
+            <div id="gal-alert" class="ga-alert" hidden></div>
+            <form id="form-gal" autocomplete="off">
+              <div class="ga-field-row">
                 <div class="admin-field">
-                  <label for="img-caption">Caption / Title</label>
-                  <input id="img-caption" name="caption" type="text" placeholder="e.g. Concrete sleeper wall — Buderim">
+                  <label for="gal-title">Section Title <span style="color:var(--accent)">*</span></label>
+                  <input id="gal-title" type="text" placeholder="e.g. Mornington Peninsula Estate" required>
                 </div>
                 <div class="admin-field">
-                  <label for="img-type">Image Type</label>
-                  <select id="img-type" name="type">
-                    <option value="">No label</option>
-                    <option value="before">Before</option>
-                    <option value="after">After</option>
-                  </select>
+                  <label for="gal-desc">Description (optional)</label>
+                  <input id="gal-desc" type="text" placeholder="Brief project description…">
                 </div>
               </div>
 
-              <div class="admin-field">
-                <label for="img-desc">Description (optional)</label>
-                <textarea id="img-desc" name="img-desc" style="min-height:5rem;" placeholder="Brief description of this project or what's shown in the photo…"></textarea>
+              <!-- Multi-image drop zone -->
+              <div class="dz" id="dz-gallery" style="margin:1.5rem 0;">
+                <div class="dz-content">
+                  <div class="dz-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+                  <p><strong>Drop photos here</strong> — multiple at once</p>
+                  <p class="dz-sub">or <span class="dz-link">click to browse</span></p>
+                </div>
+                <input type="file" class="dz-input" accept="image/*" multiple hidden>
               </div>
 
-              <button class="btn btn--primary btn--sm" type="submit">Add Image to Section</button>
+              <!-- Pending image queue -->
+              <div id="gal-queue" style="margin-bottom:1.25rem;"></div>
+
+              <button type="submit" class="btn btn--primary">Add Gallery Section</button>
             </form>
           </div>
         </div>
 
-        <!-- EXPORT / IMPORT -->
-        <div class="admin-section">
-          <h2>Backup &amp; Restore</h2>
-          <p style="margin: 0 0 1.25rem; font-size: var(--t-sm); color: var(--text-dim);">Export your gallery data as a JSON backup, or import a previously exported file to restore the gallery.</p>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+        <!-- Backup -->
+        <div class="ga-backup">
+          <h3>Backup &amp; Restore</h3>
+          <p>Export gallery data as JSON or restore from a previous backup.</p>
+          <div class="ga-backup-btns">
             <button class="btn btn--secondary btn--sm" onclick="exportGallery()">Export JSON Backup</button>
             <label class="btn btn--secondary btn--sm" style="cursor:pointer;">
-              Import JSON Backup
+              Import Backup
               <input type="file" accept=".json" style="display:none;" onchange="importGallery(this)">
             </label>
           </div>
@@ -178,41 +306,403 @@
 
       </div>
     </main>
-
-    <div style="padding: 2rem 0; text-align: center; color: rgba(255,255,255,0.25); font-size: var(--t-xs); border-top: 1px solid var(--line);">
-      RetainTech — Internal Gallery Admin &nbsp;|&nbsp; Data stored in browser localStorage
-    </div>
   </div>
 
   <script>
-    function exportGallery() {
-      const data = localStorage.getItem('ace_gallery_v1') || '[]';
-      const blob = new Blob([data], { type: 'application/json' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url;
-      a.download = 'ace-gallery-backup-' + new Date().toISOString().slice(0, 10) + '.json';
-      a.click();
-      URL.revokeObjectURL(url);
+  (function () {
+    'use strict';
+    const GALLERY_KEY = 'ace_gallery_v1';
+    const AUTH_KEY    = 'ace_admin_auth';
+    const ADMIN_PW    = 'ace-retaining-2024';
+    const hasFSA      = typeof window.showDirectoryPicker === 'function';
+
+    let dirHandle  = null;
+    let pendingBA  = { before: null, after: null };
+    let pendingGal = [];
+
+    /* ── Helpers ── */
+    function getData() { try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; } catch { return []; } }
+    function saveData(d) { localStorage.setItem(GALLERY_KEY, JSON.stringify(d)); }
+    function genId(p)  { return p + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6); }
+    function esc(s)    { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+    function $id(id)   { return document.getElementById(id); }
+
+    function showAlert(id, msg, type) {
+      const el = $id(id);
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'ga-alert ga-alert--' + (type === 'error' ? 'err' : 'ok');
+      el.hidden = false;
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.hidden = true; }, 5000);
     }
 
-    function importGallery(input) {
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const data = JSON.parse(e.target.result);
-          if (!Array.isArray(data)) throw new Error('Invalid format');
-          localStorage.setItem('ace_gallery_v1', JSON.stringify(data));
-          alert('Gallery imported successfully. Refreshing…');
-          location.reload();
-        } catch {
-          alert('Invalid file. Please use a valid gallery backup JSON.');
+    /* ── Auth ── */
+    function setupAuth() {
+      const btn   = $id('ga-pw-btn');
+      const input = $id('ga-pw');
+      const err   = $id('ga-pw-err');
+      const attempt = () => {
+        if (input.value === ADMIN_PW) {
+          sessionStorage.setItem(AUTH_KEY, '1');
+          bootApp();
+        } else {
+          err.textContent = 'Incorrect password.';
+          err.hidden = false;
+          input.value = '';
+          input.focus();
         }
       };
-      reader.readAsText(file);
+      btn.addEventListener('click', attempt);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
     }
+
+    function bootApp() {
+      $id('ga-gate').hidden = true;
+      $id('ga-app').hidden  = false;
+      updateFolderBar();
+      setupTabs();
+      setupBAForm();
+      setupGalForm();
+      render();
+    }
+
+    /* ── File System API ── */
+    window.selectFolder = async function () {
+      if (!hasFSA) return;
+      try {
+        dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        localStorage.setItem('ga_dir_name', dirHandle.name);
+        updateFolderBar();
+      } catch (e) {
+        if (e.name !== 'AbortError') alert('Could not open folder: ' + e.message);
+      }
+    };
+
+    function updateFolderBar() {
+      const bar     = $id('ga-folder-bar');
+      const saved   = localStorage.getItem('ga_dir_name');
+      if (!hasFSA) {
+        bar.innerHTML = `<div class="inner"><span class="ga-folder-warn"><strong>Note:</strong> File System Access requires Chrome or Edge. Images will be stored as data URLs.</span></div>`;
+        return;
+      }
+      if (dirHandle) {
+        bar.innerHTML = `<div class="inner"><span class="ga-folder-active"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Saving images to: <strong>${esc(dirHandle.name)}/images/</strong></span><button class="btn btn--secondary btn--sm" onclick="selectFolder()">Change folder</button></div>`;
+      } else {
+        bar.innerHTML = `<div class="inner"><span class="ga-folder-hint"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Select your project folder to save uploaded images directly to disk${saved ? ' (last: <strong>'+esc(saved)+'</strong>)' : ''}.</span><button class="btn btn--primary btn--sm" onclick="selectFolder()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Select Project Folder</button></div>`;
+      }
+    }
+
+    async function saveFile(file) {
+      const ext   = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const fname = 'gallery_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5) + '.' + ext;
+      if (dirHandle) {
+        try {
+          const imgDir   = await dirHandle.getDirectoryHandle('images', { create: true });
+          const fh       = await imgDir.getFileHandle(fname, { create: true });
+          const writable = await fh.createWritable();
+          await writable.write(file);
+          await writable.close();
+          return 'images/' + fname;
+        } catch (e) { console.warn('FSA write failed, using data URL:', e.message); }
+      }
+      return new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file); });
+    }
+
+    /* ── Drop zones ── */
+    function setupDZ(el, onFile, multi) {
+      const input = el.querySelector('.dz-input');
+      el.addEventListener('click', e => { if (!e.target.closest('.dz-clear')) input.click(); });
+      el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dz-over'); });
+      el.addEventListener('dragleave', e => { if (!el.contains(e.relatedTarget)) el.classList.remove('dz-over'); });
+      el.addEventListener('drop', e => {
+        e.preventDefault(); el.classList.remove('dz-over');
+        const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+        if (files.length) onFile(multi ? files : files[0]);
+      });
+      input.addEventListener('change', () => {
+        const files = [...input.files].filter(f => f.type.startsWith('image/'));
+        if (files.length) onFile(multi ? files : files[0]);
+        input.value = '';
+      });
+    }
+
+    function setDZPreview(dzEl, file, clearCb) {
+      const content = dzEl.querySelector('.dz-content');
+      const preview = dzEl.querySelector('.dz-preview');
+      const img     = preview.querySelector('img');
+      if (img._objUrl) URL.revokeObjectURL(img._objUrl);
+      img._objUrl = URL.createObjectURL(file);
+      img.src = img._objUrl;
+      content.hidden = true;
+      preview.hidden = false;
+      preview.querySelector('.dz-clear').onclick = () => {
+        content.hidden = false; preview.hidden = true;
+        URL.revokeObjectURL(img._objUrl); img.src = '';
+        clearCb();
+      };
+    }
+
+    function resetDZ(id) {
+      const dz = $id(id);
+      dz.querySelector('.dz-content').hidden = false;
+      dz.querySelector('.dz-preview').hidden = true;
+    }
+
+    /* ── Before & After form ── */
+    function setupBAForm() {
+      setupDZ($id('dz-before'), file => { pendingBA.before = file; setDZPreview($id('dz-before'), file, () => pendingBA.before = null); });
+      setupDZ($id('dz-after'),  file => { pendingBA.after  = file; setDZPreview($id('dz-after'),  file, () => pendingBA.after  = null); });
+
+      $id('form-ba').addEventListener('submit', async e => {
+        e.preventDefault();
+        const title = $id('ba-title').value.trim();
+        if (!title)                           { showAlert('ba-alert', 'Please enter a title.', 'error'); return; }
+        if (!pendingBA.before || !pendingBA.after) { showAlert('ba-alert', 'Please upload both a Before and After photo.', 'error'); return; }
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true; btn.textContent = 'Saving…';
+        try {
+          const [beforeUrl, afterUrl] = await Promise.all([saveFile(pendingBA.before), saveFile(pendingBA.after)]);
+          const section = {
+            id: genId('ba'), type: 'before-after', title,
+            description: $id('ba-desc').value.trim(),
+            location: $id('ba-location').value.trim(),
+            before: { url: beforeUrl, caption: $id('ba-before-cap').value.trim() },
+            after:  { url: afterUrl,  caption: $id('ba-after-cap').value.trim()  }
+          };
+          const d = getData(); d.push(section); saveData(d);
+          e.target.reset(); pendingBA = { before: null, after: null };
+          resetDZ('dz-before'); resetDZ('dz-after');
+          showAlert('ba-alert', 'Before & After section added!');
+          renderBA();
+        } catch (err) {
+          showAlert('ba-alert', 'Error: ' + err.message, 'error');
+        } finally { btn.disabled = false; btn.textContent = 'Add Before & After Section'; }
+      });
+    }
+
+    /* ── General gallery form ── */
+    function setupGalForm() {
+      setupDZ($id('dz-gallery'), files => { pendingGal.push(...files); renderQueue(); }, true);
+
+      $id('form-gal').addEventListener('submit', async e => {
+        e.preventDefault();
+        const title = $id('gal-title').value.trim();
+        if (!title)             { showAlert('gal-alert', 'Please enter a title.', 'error'); return; }
+        if (!pendingGal.length) { showAlert('gal-alert', 'Please add at least one image.', 'error'); return; }
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true; btn.textContent = 'Saving…';
+        try {
+          const images = [];
+          for (const file of pendingGal) {
+            const url = await saveFile(file);
+            images.push({ id: genId('img'), url, caption: '' });
+          }
+          const section = { id: genId('gal'), type: 'gallery', title, description: $id('gal-desc').value.trim(), images };
+          const d = getData(); d.push(section); saveData(d);
+          e.target.reset(); pendingGal = []; renderQueue();
+          showAlert('gal-alert', images.length + ' image' + (images.length !== 1 ? 's' : '') + ' saved. Gallery section added!');
+          renderGal();
+        } catch (err) {
+          showAlert('gal-alert', 'Error: ' + err.message, 'error');
+        } finally { btn.disabled = false; btn.textContent = 'Add Gallery Section'; }
+      });
+    }
+
+    function renderQueue() {
+      const c = $id('gal-queue');
+      if (!pendingGal.length) { c.innerHTML = ''; return; }
+      c.innerHTML = `
+        <div class="ga-queue-hdr">
+          <span>${pendingGal.length} image${pendingGal.length !== 1 ? 's' : ''} queued</span>
+          <button type="button" class="btn btn--sm" onclick="clearQueue()">Clear all</button>
+        </div>
+        <div class="ga-queue-grid">
+          ${pendingGal.map((f, i) => `
+            <div class="ga-queue-item">
+              <img src="${URL.createObjectURL(f)}" alt="">
+              <button type="button" class="ga-queue-del" onclick="rmFromQueue(${i})">×</button>
+              <span class="ga-queue-fname">${esc(f.name)}</span>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    window.clearQueue = () => { pendingGal = []; renderQueue(); };
+    window.rmFromQueue = i => { pendingGal.splice(i, 1); renderQueue(); };
+
+    /* ── Delete section ── */
+    window.deleteSection = function (id) {
+      if (!confirm('Delete this section? This cannot be undone.')) return;
+      saveData(getData().filter(s => s.id !== id));
+      render();
+    };
+
+    /* ── Render BA list ── */
+    function renderBA() {
+      const c = $id('ba-list');
+      const d = getData().filter(s => s.type === 'before-after');
+      if (!d.length) { c.innerHTML = '<p class="ga-empty">No Before &amp; After sections yet.</p>'; return; }
+      c.innerHTML = d.map(s => `
+        <div class="ga-card ga-card--ba">
+          <div class="ga-pair">
+            <div class="ga-thumb">
+              <img src="${esc(s.before.url)}" alt="Before" onerror="this.parentElement.style.background='#1a1f2a'">
+              <span class="ga-thumb-label">Before</span>
+            </div>
+            <div class="ga-arrow">⟷</div>
+            <div class="ga-thumb">
+              <img src="${esc(s.after.url)}" alt="After" onerror="this.parentElement.style.background='#1a1f2a'">
+              <span class="ga-thumb-label is-after">After</span>
+            </div>
+          </div>
+          <div class="ga-card-meta">
+            <h3>${esc(s.title)}</h3>
+            ${s.location ? `<span class="ga-loc">📍 ${esc(s.location)}</span>` : ''}
+            ${s.description ? `<p>${esc(s.description)}</p>` : ''}
+            <div class="ga-caps">
+              <span>Before: ${esc(s.before.caption || '—')}</span>
+              <span>After: ${esc(s.after.caption || '—')}</span>
+            </div>
+          </div>
+          <div class="ga-card-foot">
+            <span></span>
+            <div class="ga-actions">
+              <button class="btn btn--sm btn-del" onclick="deleteSection('${esc(s.id)}')">Delete</button>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    /* ── Render gallery list ── */
+    function renderGal() {
+      const c = $id('gal-list');
+      const d = getData().filter(s => s.type === 'gallery');
+      if (!d.length) { c.innerHTML = '<p class="ga-empty">No gallery sections yet.</p>'; return; }
+      c.innerHTML = d.map(s => `
+        <div class="ga-card ga-card--gallery" id="gacard-${esc(s.id)}">
+          <div class="ga-strip">
+            ${s.images.slice(0,7).map(i => `<img src="${esc(i.url)}" alt="" onerror="this.style.display='none'">`).join('')}
+            ${s.images.length > 7 ? `<span class="ga-strip-more">+${s.images.length - 7}</span>` : ''}
+          </div>
+          <div class="ga-card-meta">
+            <h3>${esc(s.title)}</h3>
+            ${s.description ? `<p>${esc(s.description)}</p>` : ''}
+          </div>
+          <div class="ga-card-foot">
+            <span class="ga-count-tag">${s.images.length} photo${s.images.length !== 1 ? 's' : ''}</span>
+            <div class="ga-actions">
+              <button class="btn btn--secondary btn--sm" onclick="toggleMgr('${esc(s.id)}')">Manage Images</button>
+              <button class="btn btn--sm btn-del" onclick="deleteSection('${esc(s.id)}')">Delete</button>
+            </div>
+          </div>
+          <div class="ga-manager" id="mgr-${esc(s.id)}" hidden></div>
+        </div>`).join('');
+    }
+
+    /* ── Manager (add/remove images in a gallery section) ── */
+    window.toggleMgr = function (id) {
+      const el  = $id('mgr-' + id);
+      const sec = getData().find(s => s.id === id);
+      if (!sec) return;
+      if (el.hidden) { el.hidden = false; buildMgr(sec, el); } else { el.hidden = true; }
+    };
+
+    function buildMgr(section, el) {
+      el.innerHTML = `
+        <h4>Images in "${esc(section.title)}"</h4>
+        <div class="ga-mgr-grid" id="mgrgrid-${esc(section.id)}">
+          ${section.images.map(img => `
+            <div class="ga-mgr-item" id="mgrimg-${esc(img.id)}">
+              <img src="${esc(img.url)}" alt="" onerror="this.style.opacity='0.3'">
+              <input class="ga-mgr-cap" type="text" placeholder="Caption…" value="${esc(img.caption || '')}"
+                onchange="updateCap('${esc(section.id)}','${esc(img.id)}',this.value)">
+              <button class="ga-mgr-del" onclick="removeImg('${esc(section.id)}','${esc(img.id)}')">×</button>
+            </div>`).join('')}
+        </div>
+        <div class="dz dz--sm" id="dz-mgr-${esc(section.id)}" style="margin-top:0.85rem;">
+          <div class="dz-content">
+            <p>Drop more images here</p>
+            <p class="dz-sub">or <span class="dz-link">click to browse</span></p>
+          </div>
+          <input type="file" class="dz-input" accept="image/*" multiple hidden>
+        </div>`;
+
+      setupDZ($id('dz-mgr-' + section.id), async files => {
+        const d   = getData();
+        const sec = d.find(s => s.id === section.id);
+        if (!sec) return;
+        for (const file of files) {
+          const url = await saveFile(file);
+          sec.images.push({ id: genId('img'), url, caption: '' });
+        }
+        saveData(d);
+        renderGal();
+        const card = $id('gacard-' + section.id);
+        const mgr  = card && card.querySelector('.ga-manager');
+        if (mgr) { mgr.hidden = false; buildMgr(sec, mgr); }
+      }, true);
+    }
+
+    window.updateCap = function (secId, imgId, cap) {
+      const d = getData();
+      const s = d.find(x => x.id === secId);
+      if (!s) return;
+      const i = s.images.find(x => x.id === imgId);
+      if (i) { i.caption = cap; saveData(d); }
+    };
+
+    window.removeImg = function (secId, imgId) {
+      if (!confirm('Remove this image?')) return;
+      const d = getData();
+      const s = d.find(x => x.id === secId);
+      if (!s) return;
+      s.images = s.images.filter(i => i.id !== imgId);
+      saveData(d);
+      renderGal();
+    };
+
+    /* ── Tabs ── */
+    function setupTabs() {
+      document.querySelectorAll('.ga-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.ga-tab').forEach(b => b.classList.remove('is-active'));
+          document.querySelectorAll('.ga-panel').forEach(p => p.hidden = true);
+          btn.classList.add('is-active');
+          $id('panel-' + btn.dataset.tab).hidden = false;
+        });
+      });
+    }
+
+    /* ── Backup ── */
+    window.exportGallery = () => {
+      const blob = new Blob([localStorage.getItem(GALLERY_KEY) || '[]'], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'gallery-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click(); URL.revokeObjectURL(a.href);
+    };
+
+    window.importGallery = input => {
+      const file = input.files[0]; if (!file) return;
+      const r = new FileReader();
+      r.onload = e => {
+        try {
+          const d = JSON.parse(e.target.result);
+          if (!Array.isArray(d)) throw new Error();
+          localStorage.setItem(GALLERY_KEY, JSON.stringify(d));
+          alert('Imported! Refreshing…'); location.reload();
+        } catch { alert('Invalid backup file.'); }
+      };
+      r.readAsText(file);
+    };
+
+    function render() { renderBA(); renderGal(); }
+
+    /* ── Boot ── */
+    setupAuth();
+    if (sessionStorage.getItem(AUTH_KEY) === '1') bootApp();
+
+  })();
   </script>
 </body>
 </html>
