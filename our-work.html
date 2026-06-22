@@ -526,7 +526,13 @@
     'use strict';
     const GALLERY_KEY = 'ace_gallery_v1';
 
-    function getData() { try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; } catch { return []; } }
+    async function getData() {
+      try {
+        const res = await fetch('gallery-data.json?v=' + Date.now());
+        if (res.ok) return await res.json();
+      } catch {}
+      try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; } catch { return []; }
+    }
     function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
 
     /* ── IndexedDB blob resolution (mirrors admin) ── */
@@ -724,7 +730,7 @@
 
     /* ── Main render ── */
     async function renderGallery() {
-      const data     = await resolveAllData(getData());
+      const data     = await resolveAllData(await getData());
       const output   = document.getElementById('gallery-output');
       const jumpWrap = document.getElementById('gallery-jump');
       const jumpNav  = document.getElementById('gallery-jump-nav');
@@ -786,7 +792,7 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', renderGallery);
+    document.addEventListener('DOMContentLoaded', () => renderGallery());
     window.addEventListener('storage', e => { if (e.key === GALLERY_KEY) renderGallery(); });
 
   })();

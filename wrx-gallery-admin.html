@@ -349,7 +349,17 @@
 
     /* ── Helpers ── */
     function getData() { try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; } catch { return []; } }
-    function saveData(d) { localStorage.setItem(GALLERY_KEY, JSON.stringify(d)); }
+    async function saveData(d) {
+      localStorage.setItem(GALLERY_KEY, JSON.stringify(d));
+      if (dirHandle) {
+        try {
+          const fh       = await dirHandle.getFileHandle('gallery-data.json', { create: true });
+          const writable = await fh.createWritable();
+          await writable.write(JSON.stringify(d, null, 2));
+          await writable.close();
+        } catch (e) { console.warn('Could not write gallery-data.json:', e.message); }
+      }
+    }
     function genId(p)  { return p + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6); }
     function esc(s)    { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
     function $id(id)   { return document.getElementById(id); }
@@ -568,7 +578,7 @@
             before: { url: beforeUrl, caption: $id('ba-before-cap').value.trim() },
             after:  { url: afterUrl,  caption: $id('ba-after-cap').value.trim()  }
           };
-          const d = getData(); d.push(section); saveData(d);
+          const d = getData(); d.push(section); await saveData(d);
           e.target.reset(); pendingBA = { before: null, after: null };
           resetDZ('dz-before'); resetDZ('dz-after');
           showAlert('ba-alert', 'Before & After section added!');
@@ -602,7 +612,7 @@
             images.push({ id: genId('vid'), url, caption: '', type: 'video' });
           }
           const section = { id: genId('gal'), type: 'gallery', title, description: $id('gal-desc').value.trim(), images };
-          const d = getData(); d.push(section); saveData(d);
+          const d = getData(); d.push(section); await saveData(d);
           e.target.reset(); pendingGalImgs = []; pendingGalVids = [];
           renderQueue(); renderVidQueue();
           const total = images.length;
@@ -666,7 +676,7 @@
           : (sec.images || []).map(i => i.url);
         for (const u of urls) { if (u?.startsWith('idb:')) delBlob(u.slice(4)).catch(() => {}); }
       }
-      saveData(d.filter(s => s.id !== id));
+      await saveData(d.filter(s => s.id !== id));
       render();
     };
 
@@ -782,11 +792,11 @@
           <input type="file" class="dz-input" accept="video/*" multiple hidden>
         </div>`;
 
-      async function refreshMgr(itemType) {
+      async function refreshMgr() {
         const d   = getData();
         const sec = d.find(s => s.id === section.id);
         if (!sec) return;
-        saveData(d);
+        await saveData(d);
         renderGal();
         const card = $id('gacard-' + section.id);
         const mgr  = card && card.querySelector('.ga-manager');
@@ -812,12 +822,12 @@
       }, true, f => f.type.startsWith('video/'));
     }
 
-    window.updateCap = function (secId, imgId, cap) {
+    window.updateCap = async function (secId, imgId, cap) {
       const d = getData();
       const s = d.find(x => x.id === secId);
       if (!s) return;
       const i = s.images.find(x => x.id === imgId);
-      if (i) { i.caption = cap; saveData(d); }
+      if (i) { i.caption = cap; await saveData(d); }
     };
 
     window.removeImg = async function (secId, imgId) {
@@ -828,7 +838,7 @@
       const item = s.images.find(x => x.id === imgId);
       if (item?.url?.startsWith('idb:')) delBlob(item.url.slice(4)).catch(() => {});
       s.images = s.images.filter(i => i.id !== imgId);
-      saveData(d);
+      await saveData(d);
       renderGal();
     };
 
