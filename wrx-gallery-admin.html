@@ -76,7 +76,12 @@
     .ga-manager h4 { margin: 0 0 0.85rem; font-size: var(--t-sm); font-weight: 700; color: var(--text); }
     .ga-mgr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); gap: 0.6rem; margin-bottom: 1rem; }
     .ga-mgr-item { border-radius: var(--r-md); overflow: hidden; background: #111; border: 1px solid var(--line); position: relative; }
-    .ga-mgr-item img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .ga-mgr-item img  { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .ga-mgr-item video { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #000; }
+    .ga-mgr-video-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-70%); width: 1.75rem; height: 1.75rem; border-radius: 50%; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.75rem; pointer-events: none; }
+    .ga-queue-item--video { background: #0c1020; border: 1px solid rgba(201,170,111,0.1); }
+    .ga-queue-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-55%); font-size: 1.6rem; color: rgba(255,255,255,0.7); pointer-events: none; line-height: 1; }
+    .ga-strip-vid { width: 4rem; height: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,0.4); font-size: 1.1rem; }
     .ga-mgr-cap { width: 100%; padding: 0.3rem 0.5rem; background: rgba(0,0,0,0.5); border: none; color: rgba(255,255,255,0.65); font-size: 0.62rem; font-family: inherit; border-top: 1px solid var(--line); outline: none; }
     .ga-mgr-cap:focus { background: rgba(0,0,0,0.8); color: #fff; }
     .ga-mgr-del { position: absolute; top: 0.3rem; right: 0.3rem; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: rgba(0,0,0,0.7); color: #fff; font-size: 0.8rem; border: none; cursor: pointer; display: grid; place-items: center; line-height: 1; }
@@ -274,19 +279,40 @@
               </div>
 
               <!-- Multi-image drop zone -->
-              <div class="dz" id="dz-gallery" style="margin:1.5rem 0;">
+              <span class="dz-label-above" style="margin-top:1.5rem;display:block;">Project Photos</span>
+              <div class="dz" id="dz-gallery" style="margin:0.35rem 0 0;">
                 <div class="dz-content">
                   <div class="dz-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
                   <p><strong>Drop photos here</strong> — multiple at once</p>
-                  <p class="dz-sub">or <span class="dz-link">click to browse</span></p>
+                  <p class="dz-sub">JPG, PNG, WebP · <span class="dz-link">click to browse</span></p>
                 </div>
                 <input type="file" class="dz-input" accept="image/*" multiple hidden>
               </div>
 
               <!-- Pending image queue -->
-              <div id="gal-queue" style="margin-bottom:1.25rem;"></div>
+              <div id="gal-queue" style="margin:0.75rem 0 0;"></div>
 
-              <button type="submit" class="btn btn--primary">Add Gallery Section</button>
+              <!-- Video drop zone -->
+              <span class="dz-label-above" style="margin-top:1.25rem;display:block;">Project Videos <span style="color:rgba(255,255,255,0.3);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></span>
+              <div class="dz" id="dz-gallery-vid" style="margin:0.35rem 0 0;">
+                <div class="dz-content">
+                  <div class="dz-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                  </div>
+                  <p><strong>Drop videos here</strong></p>
+                  <p class="dz-sub">MP4, MOV, WebM · <span class="dz-link">click to browse</span></p>
+                </div>
+                <input type="file" class="dz-input" accept="video/*" multiple hidden>
+              </div>
+
+              <!-- Pending video queue -->
+              <div id="gal-vid-queue" style="margin:0.75rem 0 0;"></div>
+
+              <div style="margin-top:1.5rem;">
+                <button type="submit" class="btn btn--primary">Add Gallery Section</button>
+              </div>
             </form>
           </div>
         </div>
@@ -316,9 +342,10 @@
     const ADMIN_PW    = 'ace-retaining-2024';
     const hasFSA      = typeof window.showDirectoryPicker === 'function';
 
-    let dirHandle  = null;
-    let pendingBA  = { before: null, after: null };
-    let pendingGal = [];
+    let dirHandle     = null;
+    let pendingBA     = { before: null, after: null };
+    let pendingGalImgs = [];
+    let pendingGalVids = [];
 
     /* ── Helpers ── */
     function getData() { try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; } catch { return []; } }
@@ -410,18 +437,19 @@
     }
 
     /* ── Drop zones ── */
-    function setupDZ(el, onFile, multi) {
-      const input = el.querySelector('.dz-input');
+    function setupDZ(el, onFile, multi, typeFilter) {
+      const filter = typeFilter || (f => f.type.startsWith('image/'));
+      const input  = el.querySelector('.dz-input');
       el.addEventListener('click', e => { if (!e.target.closest('.dz-clear')) input.click(); });
       el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dz-over'); });
       el.addEventListener('dragleave', e => { if (!el.contains(e.relatedTarget)) el.classList.remove('dz-over'); });
       el.addEventListener('drop', e => {
         e.preventDefault(); el.classList.remove('dz-over');
-        const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+        const files = [...e.dataTransfer.files].filter(filter);
         if (files.length) onFile(multi ? files : files[0]);
       });
       input.addEventListener('change', () => {
-        const files = [...input.files].filter(f => f.type.startsWith('image/'));
+        const files = [...input.files].filter(filter);
         if (files.length) onFile(multi ? files : files[0]);
         input.value = '';
       });
@@ -483,25 +511,32 @@
 
     /* ── General gallery form ── */
     function setupGalForm() {
-      setupDZ($id('dz-gallery'), files => { pendingGal.push(...files); renderQueue(); }, true);
+      setupDZ($id('dz-gallery'), files => { pendingGalImgs.push(...files); renderQueue(); }, true);
+      setupDZ($id('dz-gallery-vid'), files => { pendingGalVids.push(...files); renderVidQueue(); }, true, f => f.type.startsWith('video/'));
 
       $id('form-gal').addEventListener('submit', async e => {
         e.preventDefault();
         const title = $id('gal-title').value.trim();
-        if (!title)             { showAlert('gal-alert', 'Please enter a title.', 'error'); return; }
-        if (!pendingGal.length) { showAlert('gal-alert', 'Please add at least one image.', 'error'); return; }
+        if (!title) { showAlert('gal-alert', 'Please enter a title.', 'error'); return; }
+        if (!pendingGalImgs.length && !pendingGalVids.length) { showAlert('gal-alert', 'Please add at least one image or video.', 'error'); return; }
         const btn = e.target.querySelector('[type=submit]');
         btn.disabled = true; btn.textContent = 'Saving…';
         try {
           const images = [];
-          for (const file of pendingGal) {
+          for (const file of pendingGalImgs) {
             const url = await saveFile(file);
-            images.push({ id: genId('img'), url, caption: '' });
+            images.push({ id: genId('img'), url, caption: '', type: 'image' });
+          }
+          for (const file of pendingGalVids) {
+            const url = await saveFile(file);
+            images.push({ id: genId('vid'), url, caption: '', type: 'video' });
           }
           const section = { id: genId('gal'), type: 'gallery', title, description: $id('gal-desc').value.trim(), images };
           const d = getData(); d.push(section); saveData(d);
-          e.target.reset(); pendingGal = []; renderQueue();
-          showAlert('gal-alert', images.length + ' image' + (images.length !== 1 ? 's' : '') + ' saved. Gallery section added!');
+          e.target.reset(); pendingGalImgs = []; pendingGalVids = [];
+          renderQueue(); renderVidQueue();
+          const total = images.length;
+          showAlert('gal-alert', total + ' item' + (total !== 1 ? 's' : '') + ' saved. Gallery section added!');
           renderGal();
         } catch (err) {
           showAlert('gal-alert', 'Error: ' + err.message, 'error');
@@ -511,14 +546,14 @@
 
     function renderQueue() {
       const c = $id('gal-queue');
-      if (!pendingGal.length) { c.innerHTML = ''; return; }
+      if (!pendingGalImgs.length) { c.innerHTML = ''; return; }
       c.innerHTML = `
         <div class="ga-queue-hdr">
-          <span>${pendingGal.length} image${pendingGal.length !== 1 ? 's' : ''} queued</span>
-          <button type="button" class="btn btn--sm" onclick="clearQueue()">Clear all</button>
+          <span>${pendingGalImgs.length} photo${pendingGalImgs.length !== 1 ? 's' : ''} queued</span>
+          <button type="button" class="btn btn--sm" onclick="clearQueue()">Clear</button>
         </div>
         <div class="ga-queue-grid">
-          ${pendingGal.map((f, i) => `
+          ${pendingGalImgs.map((f, i) => `
             <div class="ga-queue-item">
               <img src="${URL.createObjectURL(f)}" alt="">
               <button type="button" class="ga-queue-del" onclick="rmFromQueue(${i})">×</button>
@@ -527,8 +562,28 @@
         </div>`;
     }
 
-    window.clearQueue = () => { pendingGal = []; renderQueue(); };
-    window.rmFromQueue = i => { pendingGal.splice(i, 1); renderQueue(); };
+    function renderVidQueue() {
+      const c = $id('gal-vid-queue');
+      if (!pendingGalVids.length) { c.innerHTML = ''; return; }
+      c.innerHTML = `
+        <div class="ga-queue-hdr">
+          <span>${pendingGalVids.length} video${pendingGalVids.length !== 1 ? 's' : ''} queued</span>
+          <button type="button" class="btn btn--sm" onclick="clearVidQueue()">Clear</button>
+        </div>
+        <div class="ga-queue-grid">
+          ${pendingGalVids.map((f, i) => `
+            <div class="ga-queue-item ga-queue-item--video">
+              <span class="ga-queue-play">▶</span>
+              <button type="button" class="ga-queue-del" onclick="rmVid(${i})">×</button>
+              <span class="ga-queue-fname">${esc(f.name)}</span>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    window.clearQueue    = () => { pendingGalImgs = []; renderQueue(); };
+    window.rmFromQueue   = i  => { pendingGalImgs.splice(i, 1); renderQueue(); };
+    window.clearVidQueue = () => { pendingGalVids = []; renderVidQueue(); };
+    window.rmVid         = i  => { pendingGalVids.splice(i, 1); renderVidQueue(); };
 
     /* ── Delete section ── */
     window.deleteSection = function (id) {
@@ -578,10 +633,21 @@
       const c = $id('gal-list');
       const d = getData().filter(s => s.type === 'gallery');
       if (!d.length) { c.innerHTML = '<p class="ga-empty">No gallery sections yet.</p>'; return; }
-      c.innerHTML = d.map(s => `
+      c.innerHTML = d.map(s => {
+        const imgCount = s.images.filter(i => i.type !== 'video').length;
+        const vidCount = s.images.filter(i => i.type === 'video').length;
+        const countLabel = [
+          imgCount ? `${imgCount} photo${imgCount !== 1 ? 's' : ''}` : '',
+          vidCount ? `${vidCount} video${vidCount !== 1 ? 's' : ''}` : ''
+        ].filter(Boolean).join(' · ') || '0 items';
+        return `
         <div class="ga-card ga-card--gallery" id="gacard-${esc(s.id)}">
           <div class="ga-strip">
-            ${s.images.slice(0,7).map(i => `<img src="${esc(i.url)}" alt="" onerror="this.style.display='none'">`).join('')}
+            ${s.images.slice(0,7).map(i =>
+              i.type === 'video'
+                ? `<div class="ga-strip-vid">▶</div>`
+                : `<img src="${esc(i.url)}" alt="" onerror="this.style.display='none'">`
+            ).join('')}
             ${s.images.length > 7 ? `<span class="ga-strip-more">+${s.images.length - 7}</span>` : ''}
           </div>
           <div class="ga-card-meta">
@@ -589,14 +655,15 @@
             ${s.description ? `<p>${esc(s.description)}</p>` : ''}
           </div>
           <div class="ga-card-foot">
-            <span class="ga-count-tag">${s.images.length} photo${s.images.length !== 1 ? 's' : ''}</span>
+            <span class="ga-count-tag">${countLabel}</span>
             <div class="ga-actions">
-              <button class="btn btn--secondary btn--sm" onclick="toggleMgr('${esc(s.id)}')">Manage Images</button>
+              <button class="btn btn--secondary btn--sm" onclick="toggleMgr('${esc(s.id)}')">Manage Media</button>
               <button class="btn btn--sm btn-del" onclick="deleteSection('${esc(s.id)}')">Delete</button>
             </div>
           </div>
           <div class="ga-manager" id="mgr-${esc(s.id)}" hidden></div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }
 
     /* ── Manager (add/remove images in a gallery section) ── */
@@ -609,38 +676,56 @@
 
     function buildMgr(section, el) {
       el.innerHTML = `
-        <h4>Images in "${esc(section.title)}"</h4>
+        <h4>Media in "${esc(section.title)}"</h4>
         <div class="ga-mgr-grid" id="mgrgrid-${esc(section.id)}">
-          ${section.images.map(img => `
-            <div class="ga-mgr-item" id="mgrimg-${esc(img.id)}">
-              <img src="${esc(img.url)}" alt="" onerror="this.style.opacity='0.3'">
-              <input class="ga-mgr-cap" type="text" placeholder="Caption…" value="${esc(img.caption || '')}"
-                onchange="updateCap('${esc(section.id)}','${esc(img.id)}',this.value)">
-              <button class="ga-mgr-del" onclick="removeImg('${esc(section.id)}','${esc(img.id)}')">×</button>
+          ${section.images.map(item => `
+            <div class="ga-mgr-item" id="mgrimg-${esc(item.id)}">
+              ${item.type === 'video'
+                ? `<video src="${esc(item.url)}" preload="metadata" muted style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000;"></video><span class="ga-mgr-video-badge">▶</span>`
+                : `<img src="${esc(item.url)}" alt="" onerror="this.style.opacity='0.3'">`}
+              <input class="ga-mgr-cap" type="text" placeholder="Caption…" value="${esc(item.caption || '')}"
+                onchange="updateCap('${esc(section.id)}','${esc(item.id)}',this.value)">
+              <button class="ga-mgr-del" onclick="removeImg('${esc(section.id)}','${esc(item.id)}')">×</button>
             </div>`).join('')}
         </div>
         <div class="dz dz--sm" id="dz-mgr-${esc(section.id)}" style="margin-top:0.85rem;">
           <div class="dz-content">
-            <p>Drop more images here</p>
+            <p>Add more photos</p>
             <p class="dz-sub">or <span class="dz-link">click to browse</span></p>
           </div>
           <input type="file" class="dz-input" accept="image/*" multiple hidden>
+        </div>
+        <div class="dz dz--sm" id="dz-mgr-vid-${esc(section.id)}" style="margin-top:0.5rem;">
+          <div class="dz-content">
+            <p>Add more videos</p>
+            <p class="dz-sub">MP4, MOV, WebM · <span class="dz-link">click to browse</span></p>
+          </div>
+          <input type="file" class="dz-input" accept="video/*" multiple hidden>
         </div>`;
 
       setupDZ($id('dz-mgr-' + section.id), async files => {
-        const d   = getData();
-        const sec = d.find(s => s.id === section.id);
-        if (!sec) return;
+        const d = getData(); const sec = d.find(s => s.id === section.id); if (!sec) return;
         for (const file of files) {
           const url = await saveFile(file);
-          sec.images.push({ id: genId('img'), url, caption: '' });
+          sec.images.push({ id: genId('img'), url, caption: '', type: 'image' });
         }
-        saveData(d);
-        renderGal();
+        saveData(d); renderGal();
         const card = $id('gacard-' + section.id);
         const mgr  = card && card.querySelector('.ga-manager');
-        if (mgr) { mgr.hidden = false; buildMgr(sec, mgr); }
+        if (mgr) { mgr.hidden = false; buildMgr(d.find(s => s.id === section.id), mgr); }
       }, true);
+
+      setupDZ($id('dz-mgr-vid-' + section.id), async files => {
+        const d = getData(); const sec = d.find(s => s.id === section.id); if (!sec) return;
+        for (const file of files) {
+          const url = await saveFile(file);
+          sec.images.push({ id: genId('vid'), url, caption: '', type: 'video' });
+        }
+        saveData(d); renderGal();
+        const card = $id('gacard-' + section.id);
+        const mgr  = card && card.querySelector('.ga-manager');
+        if (mgr) { mgr.hidden = false; buildMgr(d.find(s => s.id === section.id), mgr); }
+      }, true, f => f.type.startsWith('video/'));
     }
 
     window.updateCap = function (secId, imgId, cap) {
