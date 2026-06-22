@@ -11,7 +11,7 @@ const siteHeader = `
       <span class="brand-mark" aria-hidden="true"></span>
       <span class="brand-text">
         <strong>RetainTech</strong>
-        <span>Premium walls & landscapes</span>
+        <span>Premium walls & fencing</span>
       </span>
     </a>
 
@@ -45,7 +45,7 @@ const siteFooter = `
           <span>Built for strength, designed to last</span>
         </span>
       </a>
-      <p>High-end retaining walls, landscaping and site works across the Mornington Peninsula, Melbourne, Geelong and Greater Melbourne.</p>
+      <p>High-end retaining walls, fencing and site works across the Mornington Peninsula, Melbourne, Geelong and Greater Melbourne.</p>
     </div>
 
     <div class="footer-col">
@@ -54,7 +54,7 @@ const siteFooter = `
         <li><a href="services.html#concrete">Concrete Retaining Walls</a></li>
         <li><a href="services.html#sleeper">Concrete Sleeper Walls</a></li>
         <li><a href="services.html#timber">Timber Retaining Walls</a></li>
-        <li><a href="services.html#landscaping">Landscaping & Excavation</a></li>
+        <li><a href="services.html#fencing">Fencing & Excavation</a></li>
       </ul>
     </div>
 
@@ -218,7 +218,7 @@ function injectSchema() {
     telephone: '+61 7 5300 4821',
     email: 'quotes@retaintech.com.au',
     areaServed: ['Mornington Peninsula', 'Melbourne', 'Geelong', 'Greater Melbourne'],
-    description: 'Premium retaining walls, landscaping and excavation services across Greater Melbourne.'
+    description: 'Premium retaining walls, fencing and excavation services across Greater Melbourne.'
   };
   const el = document.createElement('script');
   el.type = 'application/ld+json';
