@@ -529,6 +529,49 @@
     function getData() { try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; } catch { return []; } }
     function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
 
+    /* ── IndexedDB blob resolution (mirrors admin) ── */
+    const IDB_DB    = 'ace_gallery_blobs';
+    const IDB_STORE = 'blobs';
+    function openBlobDB() {
+      return new Promise((res, rej) => {
+        const req = indexedDB.open(IDB_DB, 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+        req.onsuccess  = e => res(e.target.result);
+        req.onerror    = e => rej(e.target.error);
+      });
+    }
+    async function getBlob(key) {
+      const db = await openBlobDB();
+      return new Promise((res, rej) => {
+        const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
+        req.onsuccess = () => res(req.result || null);
+        req.onerror   = e => rej(e.target.error);
+      });
+    }
+    const _urlCache = {};
+    async function resolveUrl(url) {
+      if (!url || !url.startsWith('idb:')) return url || '';
+      if (_urlCache[url]) return _urlCache[url];
+      try {
+        const blob = await getBlob(url.slice(4));
+        if (!blob) return '';
+        const oUrl = URL.createObjectURL(blob);
+        _urlCache[url] = oUrl; return oUrl;
+      } catch { return ''; }
+    }
+    async function resolveAllData(data) {
+      return Promise.all(data.map(async sec => {
+        if (sec.type === 'before-after') return { ...sec,
+          before: { ...sec.before, url: await resolveUrl(sec.before?.url) },
+          after:  { ...sec.after,  url: await resolveUrl(sec.after?.url) }
+        };
+        if (sec.type === 'gallery') return { ...sec,
+          images: await Promise.all((sec.images || []).map(async i => ({ ...i, url: await resolveUrl(i.url) })))
+        };
+        return sec;
+      }));
+    }
+
     /* ── Lightbox ── */
     let allImages = [];
     let lbIndex   = 0;
@@ -680,8 +723,8 @@
     }
 
     /* ── Main render ── */
-    function renderGallery() {
-      const data     = getData();
+    async function renderGallery() {
+      const data     = await resolveAllData(getData());
       const output   = document.getElementById('gallery-output');
       const jumpWrap = document.getElementById('gallery-jump');
       const jumpNav  = document.getElementById('gallery-jump-nav');

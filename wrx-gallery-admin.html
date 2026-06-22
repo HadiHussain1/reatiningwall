@@ -354,6 +354,74 @@
     function esc(s)    { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
     function $id(id)   { return document.getElementById(id); }
 
+    /* ── IndexedDB blob store (avoids localStorage quota) ── */
+    const IDB_DB    = 'ace_gallery_blobs';
+    const IDB_STORE = 'blobs';
+
+    function openBlobDB() {
+      return new Promise((res, rej) => {
+        const req = indexedDB.open(IDB_DB, 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+        req.onsuccess  = e => res(e.target.result);
+        req.onerror    = e => rej(e.target.error);
+      });
+    }
+    async function putBlob(key, blob) {
+      const db = await openBlobDB();
+      return new Promise((res, rej) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(blob, key);
+        tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
+      });
+    }
+    async function getBlob(key) {
+      const db = await openBlobDB();
+      return new Promise((res, rej) => {
+        const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
+        req.onsuccess = () => res(req.result || null);
+        req.onerror   = e => rej(e.target.error);
+      });
+    }
+    async function delBlob(key) {
+      const db = await openBlobDB();
+      return new Promise((res, rej) => {
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(key);
+        tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
+      });
+    }
+
+    /* ── URL resolution: idb:key → object URL ── */
+    const _urlCache = {};
+    async function resolveUrl(url) {
+      if (!url || !url.startsWith('idb:')) return url || '';
+      if (_urlCache[url]) return _urlCache[url];
+      try {
+        const blob = await getBlob(url.slice(4));
+        if (!blob) return '';
+        const oUrl = URL.createObjectURL(blob);
+        _urlCache[url] = oUrl;
+        return oUrl;
+      } catch { return ''; }
+    }
+    async function resolveSection(sec) {
+      if (sec.type === 'before-after') {
+        return { ...sec,
+          before: { ...sec.before, url: await resolveUrl(sec.before?.url) },
+          after:  { ...sec.after,  url: await resolveUrl(sec.after?.url)  }
+        };
+      }
+      if (sec.type === 'gallery') {
+        return { ...sec, images: await Promise.all(
+          (sec.images || []).map(async i => ({ ...i, url: await resolveUrl(i.url) }))
+        )};
+      }
+      return sec;
+    }
+    async function getResolvedData() {
+      return Promise.all(getData().map(resolveSection));
+    }
+
     function showAlert(id, msg, type) {
       const el = $id(id);
       if (!el) return;
@@ -410,7 +478,7 @@
       const bar     = $id('ga-folder-bar');
       const saved   = localStorage.getItem('ga_dir_name');
       if (!hasFSA) {
-        bar.innerHTML = `<div class="inner"><span class="ga-folder-warn"><strong>Note:</strong> File System Access requires Chrome or Edge. Images will be stored as data URLs.</span></div>`;
+        bar.innerHTML = `<div class="inner"><span class="ga-folder-warn"><strong>Note:</strong> File System Access requires Chrome or Edge. Files will be stored in browser IndexedDB — select a folder to save directly to disk.</span></div>`;
         return;
       }
       if (dirHandle) {
@@ -431,9 +499,11 @@
           await writable.write(file);
           await writable.close();
           return 'images/' + fname;
-        } catch (e) { console.warn('FSA write failed, using data URL:', e.message); }
+        } catch (e) { console.warn('FSA write failed, falling back to IDB:', e.message); }
       }
-      return new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file); });
+      // Fallback: store blob in IndexedDB (no localStorage quota hit)
+      await putBlob(fname, file);
+      return 'idb:' + fname;
     }
 
     /* ── Drop zones ── */
@@ -586,16 +656,24 @@
     window.rmVid         = i  => { pendingGalVids.splice(i, 1); renderVidQueue(); };
 
     /* ── Delete section ── */
-    window.deleteSection = function (id) {
+    window.deleteSection = async function (id) {
       if (!confirm('Delete this section? This cannot be undone.')) return;
-      saveData(getData().filter(s => s.id !== id));
+      const d   = getData();
+      const sec = d.find(s => s.id === id);
+      if (sec) {
+        const urls = sec.type === 'before-after'
+          ? [sec.before?.url, sec.after?.url]
+          : (sec.images || []).map(i => i.url);
+        for (const u of urls) { if (u?.startsWith('idb:')) delBlob(u.slice(4)).catch(() => {}); }
+      }
+      saveData(d.filter(s => s.id !== id));
       render();
     };
 
     /* ── Render BA list ── */
-    function renderBA() {
+    async function renderBA(resolvedData) {
       const c = $id('ba-list');
-      const d = getData().filter(s => s.type === 'before-after');
+      const d = (resolvedData ?? await getResolvedData()).filter(s => s.type === 'before-after');
       if (!d.length) { c.innerHTML = '<p class="ga-empty">No Before &amp; After sections yet.</p>'; return; }
       c.innerHTML = d.map(s => `
         <div class="ga-card ga-card--ba">
@@ -629,9 +707,9 @@
     }
 
     /* ── Render gallery list ── */
-    function renderGal() {
+    async function renderGal(resolvedData) {
       const c = $id('gal-list');
-      const d = getData().filter(s => s.type === 'gallery');
+      const d = (resolvedData ?? await getResolvedData()).filter(s => s.type === 'gallery');
       if (!d.length) { c.innerHTML = '<p class="ga-empty">No gallery sections yet.</p>'; return; }
       c.innerHTML = d.map(s => {
         const imgCount = s.images.filter(i => i.type !== 'video').length;
@@ -666,12 +744,13 @@
       }).join('');
     }
 
-    /* ── Manager (add/remove images in a gallery section) ── */
-    window.toggleMgr = function (id) {
+    /* ── Manager (add/remove media in a gallery section) ── */
+    window.toggleMgr = async function (id) {
       const el  = $id('mgr-' + id);
       const sec = getData().find(s => s.id === id);
       if (!sec) return;
-      if (el.hidden) { el.hidden = false; buildMgr(sec, el); } else { el.hidden = true; }
+      if (el.hidden) { el.hidden = false; buildMgr(await resolveSection(sec), el); }
+      else { el.hidden = true; }
     };
 
     function buildMgr(section, el) {
@@ -703,16 +782,24 @@
           <input type="file" class="dz-input" accept="video/*" multiple hidden>
         </div>`;
 
+      async function refreshMgr(itemType) {
+        const d   = getData();
+        const sec = d.find(s => s.id === section.id);
+        if (!sec) return;
+        saveData(d);
+        renderGal();
+        const card = $id('gacard-' + section.id);
+        const mgr  = card && card.querySelector('.ga-manager');
+        if (mgr) { mgr.hidden = false; buildMgr(await resolveSection(d.find(s => s.id === section.id)), mgr); }
+      }
+
       setupDZ($id('dz-mgr-' + section.id), async files => {
         const d = getData(); const sec = d.find(s => s.id === section.id); if (!sec) return;
         for (const file of files) {
           const url = await saveFile(file);
           sec.images.push({ id: genId('img'), url, caption: '', type: 'image' });
         }
-        saveData(d); renderGal();
-        const card = $id('gacard-' + section.id);
-        const mgr  = card && card.querySelector('.ga-manager');
-        if (mgr) { mgr.hidden = false; buildMgr(d.find(s => s.id === section.id), mgr); }
+        await refreshMgr();
       }, true);
 
       setupDZ($id('dz-mgr-vid-' + section.id), async files => {
@@ -721,10 +808,7 @@
           const url = await saveFile(file);
           sec.images.push({ id: genId('vid'), url, caption: '', type: 'video' });
         }
-        saveData(d); renderGal();
-        const card = $id('gacard-' + section.id);
-        const mgr  = card && card.querySelector('.ga-manager');
-        if (mgr) { mgr.hidden = false; buildMgr(d.find(s => s.id === section.id), mgr); }
+        await refreshMgr();
       }, true, f => f.type.startsWith('video/'));
     }
 
@@ -736,11 +820,13 @@
       if (i) { i.caption = cap; saveData(d); }
     };
 
-    window.removeImg = function (secId, imgId) {
-      if (!confirm('Remove this image?')) return;
+    window.removeImg = async function (secId, imgId) {
+      if (!confirm('Remove this item?')) return;
       const d = getData();
       const s = d.find(x => x.id === secId);
       if (!s) return;
+      const item = s.images.find(x => x.id === imgId);
+      if (item?.url?.startsWith('idb:')) delBlob(item.url.slice(4)).catch(() => {});
       s.images = s.images.filter(i => i.id !== imgId);
       saveData(d);
       renderGal();
@@ -759,8 +845,30 @@
     }
 
     /* ── Backup ── */
-    window.exportGallery = () => {
-      const blob = new Blob([localStorage.getItem(GALLERY_KEY) || '[]'], { type: 'application/json' });
+    function blobToDataUrl(blob) {
+      return new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(blob); });
+    }
+
+    window.exportGallery = async () => {
+      const raw  = getData();
+      const data = JSON.parse(JSON.stringify(raw));
+
+      async function idbToDataUrl(url) {
+        if (!url?.startsWith('idb:')) return url;
+        const b = await getBlob(url.slice(4));
+        return b ? blobToDataUrl(b) : url;
+      }
+
+      for (const sec of data) {
+        if (sec.type === 'before-after') {
+          sec.before.url = await idbToDataUrl(sec.before?.url);
+          sec.after.url  = await idbToDataUrl(sec.after?.url);
+        } else if (sec.type === 'gallery') {
+          for (const img of (sec.images || [])) img.url = await idbToDataUrl(img.url);
+        }
+      }
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'gallery-backup-' + new Date().toISOString().slice(0, 10) + '.json';
@@ -770,18 +878,42 @@
     window.importGallery = input => {
       const file = input.files[0]; if (!file) return;
       const r = new FileReader();
-      r.onload = e => {
+      r.onload = async e => {
         try {
           const d = JSON.parse(e.target.result);
-          if (!Array.isArray(d)) throw new Error();
+          if (!Array.isArray(d)) throw new Error('Not a valid backup.');
+
+          async function dataUrlToIdb(url) {
+            if (!url?.startsWith('data:')) return url;
+            const res  = await fetch(url);
+            const blob = await res.blob();
+            const ext  = blob.type.split('/')[1] || 'bin';
+            const key  = 'gallery_' + Date.now() + '_' + Math.random().toString(36).slice(2,5) + '.' + ext;
+            await putBlob(key, blob);
+            return 'idb:' + key;
+          }
+
+          for (const sec of d) {
+            if (sec.type === 'before-after') {
+              sec.before.url = await dataUrlToIdb(sec.before?.url);
+              sec.after.url  = await dataUrlToIdb(sec.after?.url);
+            } else if (sec.type === 'gallery') {
+              for (const img of (sec.images || [])) img.url = await dataUrlToIdb(img.url);
+            }
+          }
+
           localStorage.setItem(GALLERY_KEY, JSON.stringify(d));
-          alert('Imported! Refreshing…'); location.reload();
-        } catch { alert('Invalid backup file.'); }
+          alert('Imported successfully! Refreshing…'); location.reload();
+        } catch (err) { alert('Import failed: ' + err.message); }
       };
       r.readAsText(file);
     };
 
-    function render() { renderBA(); renderGal(); }
+    async function render() {
+      const data = await getResolvedData();
+      renderBA(data);
+      renderGal(data);
+    }
 
     /* ── Boot ── */
     setupAuth();
