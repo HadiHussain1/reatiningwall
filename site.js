@@ -247,10 +247,10 @@ function injectSchema() {
    ⑤ Paste the three values below — done. No server needed.
    =================================================================== */
 
-const EMAILJS_PUBLIC_KEY    = 'YOUR_PUBLIC_KEY';      // Account → API Keys
-const EMAILJS_SERVICE_ID    = 'YOUR_SERVICE_ID';      // Email Services tab
-const EMAILJS_TPL_SPECIFIED = 'template_specified';   // Template ID for wall quote
-const EMAILJS_TPL_GENERAL   = 'template_general';     // Template ID for enquiry
+const EMAILJS_PUBLIC_KEY    = 'sUVZJzMLinM9gcbos';
+const EMAILJS_SERVICE_ID    = 'service_zls0q29';
+const EMAILJS_TPL_SPECIFIED = 'template_qjeubrz';
+const EMAILJS_TPL_GENERAL   = 'template_jcoox2i';
 
 /* Called once on page load to authenticate the EmailJS session */
 function initEmailJS() {
@@ -310,7 +310,7 @@ function initSpecifiedForm() {
     setFormLoading(form, true);
     try {
       await sendEmail(EMAILJS_TPL_SPECIFIED, {
-        to_email: 'Hadi.ishfaque@gmail.com',
+        to_email: 'daalispmmm@gmail.com',
         from_name:    data.name,
         from_email:   data.email,
         phone:         data.phone,
@@ -347,7 +347,7 @@ function initGeneralForm() {
     setFormLoading(form, true);
     try {
       await sendEmail(EMAILJS_TPL_GENERAL, {
-        to_email: 'Hadi.ishfaque@gmail.com',
+        to_email: 'daalispmmm@gmail.com',
         from_name:  data.name,
         from_email: data.email,
         phone:       data.phone,
