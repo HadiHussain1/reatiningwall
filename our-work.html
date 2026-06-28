@@ -1,11 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Our Work | RetainTech</title>
-  <meta name="description" content="Browse completed retaining wall and fencing projects from RetainTech — before and after photography, project sections and finished outcomes across Greater Melbourne.">
-  <meta name="robots" content="noindex">
+  <meta name="description" content="Browse completed retaining wall and fencing projects from RetainTech — thirteen finished projects across Greater Melbourne.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,433 +12,169 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script defer src="site.js"></script>
   <style>
-    /* ── Gallery-specific styles ── */
-
+    /* ── Hero strip ── */
     .gallery-hero-strip {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 0.75rem;
       margin-top: 2.5rem;
     }
-
     .gallery-hero-strip .strip-img {
       border-radius: var(--r-lg);
       overflow: hidden;
-      aspect-ratio: 4/3;
+      aspect-ratio: 16/9;
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--line);
     }
-
     .gallery-hero-strip .strip-img img {
       width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
+      object-fit: cover; display: block;
       opacity: 0.85;
       transition: opacity 300ms ease, transform 300ms ease;
     }
+    .gallery-hero-strip .strip-img:hover img { opacity: 1; transform: scale(1.03); }
 
-    .gallery-hero-strip .strip-img:hover img {
-      opacity: 1;
-      transform: scale(1.03);
-    }
-
-    /* Section dividers */
+    /* ── Section structure ── */
     .gallery-sections { padding-bottom: 1rem; }
-
     .gsection {
       padding: clamp(3rem,6vw,5.5rem) 0;
       border-bottom: 1px solid var(--line);
     }
     .gsection:last-child { border-bottom: none; }
-
     .gsection-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 2rem;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 2rem;
       margin-bottom: 2rem;
     }
-
-    .gsection-title-block {}
     .gsection-title-block .kicker { margin-bottom: 0.5rem; display: flex; }
     .gsection-title-block h2 {
-      margin: 0;
-      font-size: var(--t-2xl);
-      line-height: 1.04;
-      letter-spacing: -0.04em;
-      color: var(--text);
+      margin: 0; font-size: var(--t-2xl);
+      line-height: 1.04; letter-spacing: -0.04em; color: var(--text);
     }
     .gsection-title-block p {
-      margin: 0.6rem 0 0;
-      font-size: var(--t-sm);
-      color: var(--text-dim);
-      max-width: 54ch;
+      margin: 0.6rem 0 0; font-size: var(--t-sm);
+      color: var(--text-dim); max-width: 54ch;
     }
-
     .gsection-count {
-      font-size: var(--t-xs);
-      color: rgba(255,255,255,0.28);
-      white-space: nowrap;
-      margin-top: 0.35rem;
-      font-variant-numeric: tabular-nums;
+      font-size: var(--t-xs); color: rgba(255,255,255,0.28);
+      white-space: nowrap; margin-top: 0.35rem; font-variant-numeric: tabular-nums;
     }
 
-    /* Grid: default 3 cols, auto-fills tightly */
-    .gphoto-grid {
+    /* ── Jump nav ── */
+    .gallery-jump-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2.5rem; }
+    .gallery-jump-btn {
+      display: inline-flex; align-items: center;
+      padding: 0.5rem 1rem; border-radius: 999px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+      color: rgba(255,255,255,0.72); font-size: var(--t-xs); font-weight: 500;
+      text-decoration: none;
+      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+    }
+    .gallery-jump-btn:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.16); }
+
+    /* ── Shared card ── */
+    .proj-card {
+      border-radius: var(--r-lg); overflow: hidden;
+      background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.07);
+      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+      cursor: pointer;
+    }
+    .proj-card:hover { transform: translateY(-3px); box-shadow: 0 24px 56px rgba(0,0,0,0.4); border-color: rgba(201,170,111,0.22); }
+    .proj-img { aspect-ratio: 4/3; overflow: hidden; background: #13161e; }
+    .proj-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 340ms ease; }
+    .proj-card:hover .proj-img img { transform: scale(1.04); }
+
+    /* ── Style A: equal 3-col grid ── */
+    .proj-layout--grid .proj-photos {
       display: grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
       gap: 0.85rem;
     }
 
-    /* When a section has only 1 or 2 images, spread them wider */
-    .gphoto-grid.cols-1 { grid-template-columns: minmax(0,1fr); }
-    .gphoto-grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-
-    .gphoto-card {
-      border-radius: var(--r-lg);
-      overflow: hidden;
-      background: rgba(255,255,255,0.035);
+    /* ── Style B: full-width hero + compact strip ── */
+    .proj-hero-wrap {
+      border-radius: var(--r-xl); overflow: hidden;
+      aspect-ratio: 16/9; margin-bottom: 0.85rem;
+      cursor: pointer; position: relative; display: block;
       border: 1px solid rgba(255,255,255,0.07);
-      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
-      cursor: pointer;
+      transition: border-color 200ms ease;
     }
-    .gphoto-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 24px 56px rgba(0,0,0,0.4);
-      border-color: rgba(201,170,111,0.22);
-    }
-
-    .gphoto-img {
-      aspect-ratio: 4/3;
-      overflow: hidden;
-      position: relative;
-      background: #13161e;
-    }
-    .gphoto-img img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 340ms ease;
-    }
-    .gphoto-card:hover .gphoto-img img { transform: scale(1.04); }
-
-    /* No image state */
-    .gphoto-img-empty {
-      width: 100%; height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(145deg, #13161e, #1a1f2a);
-    }
-    .gphoto-img-empty svg {
-      width: 2rem; height: 2rem;
-      stroke: rgba(201,170,111,0.3);
-      fill: none;
-      stroke-width: 1.2;
-    }
-
-    .gphoto-badge {
-      position: absolute;
-      top: 0.7rem; left: 0.7rem;
-      z-index: 2;
-      padding: 0.25rem 0.72rem;
-      border-radius: 999px;
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .gphoto-badge--before {
-      background: rgba(15,17,22,0.75);
-      backdrop-filter: blur(6px);
-      color: rgba(255,255,255,0.72);
-      border: 1px solid rgba(255,255,255,0.14);
-    }
-    .gphoto-badge--after {
-      background: var(--accent);
-      color: #111317;
-    }
-
-    .gphoto-body {
-      padding: 0.95rem 1.05rem;
-    }
-    .gphoto-body h4 {
-      margin: 0 0 0.28rem;
-      font-size: var(--t-sm);
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.2;
-    }
-    .gphoto-body p {
-      margin: 0;
-      font-size: var(--t-xs);
-      color: var(--text-dim);
-      line-height: 1.55;
-    }
-
-    /* Lightbox */
-    .lightbox {
-      position: fixed; inset: 0;
-      z-index: 9000;
-      background: rgba(8,10,13,0.96);
-      backdrop-filter: blur(10px);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-      animation: lbFadeIn 160ms ease;
-    }
-    .lightbox.is-open { display: flex; }
-    @keyframes lbFadeIn { from { opacity:0; } to { opacity:1; } }
-
-    .lightbox-close {
-      position: absolute;
-      top: 1.25rem; right: 1.25rem;
-      width: 2.8rem; height: 2.8rem;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.8);
-      font-size: 1.25rem;
+    .proj-hero-wrap:hover { border-color: rgba(201,170,111,0.22); }
+    .proj-hero-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 340ms ease; }
+    .proj-hero-wrap:hover img { transform: scale(1.03); }
+    .proj-layout--hero .proj-photos {
       display: grid;
-      place-items: center;
-      cursor: pointer;
-      transition: background 160ms ease;
-      z-index: 2;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 0.85rem;
+    }
+    .proj-layout--hero .proj-photos .proj-img { aspect-ratio: 1; }
+
+    /* ── Style C: asymmetric split (60/40) then grid ── */
+    .proj-featured {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 0.85rem; margin-bottom: 0.85rem;
+    }
+    .proj-featured .proj-card:first-child .proj-img { aspect-ratio: 16/9; }
+    .proj-featured .proj-card:last-child  .proj-img { aspect-ratio: 4/3; }
+    .proj-layout--split .proj-photos {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 0.85rem;
+    }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(8,10,13,0.96); backdrop-filter: blur(10px);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    .lightbox.is-open { display: flex; animation: lbIn 160ms ease; }
+    @keyframes lbIn { from { opacity:0; } to { opacity:1; } }
+    .lightbox-close {
+      position: absolute; top: 1.25rem; right: 1.25rem;
+      width: 2.8rem; height: 2.8rem; border-radius: 50%;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8); font-size: 1.25rem;
+      display: grid; place-items: center; cursor: pointer;
+      transition: background 160ms ease; z-index: 2;
     }
     .lightbox-close:hover { background: rgba(255,255,255,0.14); }
-
     .lightbox-img-wrap {
-      max-width: min(920px, calc(100vw - 3rem));
-      max-height: calc(100vh - 12rem);
-      border-radius: var(--r-lg);
-      overflow: hidden;
+      max-width: min(960px, calc(100vw - 3rem));
+      max-height: calc(100vh - 8rem);
+      border-radius: var(--r-lg); overflow: hidden;
       box-shadow: 0 40px 120px rgba(0,0,0,0.7);
     }
-    .lightbox-img-wrap img {
-      display: block;
-      max-width: 100%;
-      max-height: calc(100vh - 12rem);
-      object-fit: contain;
-    }
-
-    .lightbox-meta {
-      margin-top: 1.1rem;
-      text-align: center;
-    }
-    .lightbox-meta h4 {
-      margin: 0 0 0.3rem;
-      font-size: var(--t-lg);
-      color: var(--text);
-      font-weight: 700;
-    }
-    .lightbox-meta p {
-      margin: 0;
-      font-size: var(--t-sm);
-      color: var(--text-dim);
-    }
-
+    .lightbox-img-wrap img { display: block; max-width: 100%; max-height: calc(100vh - 8rem); object-fit: contain; }
     .lightbox-nav {
-      position: absolute;
-      top: 50%; transform: translateY(-50%);
-      width: 2.8rem; height: 2.8rem;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.8);
-      font-size: 1rem;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      transition: background 160ms ease;
-      z-index: 2;
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 2.8rem; height: 2.8rem; border-radius: 50%;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8); font-size: 1rem;
+      display: grid; place-items: center; cursor: pointer;
+      transition: background 160ms ease; z-index: 2;
     }
     .lightbox-nav:hover { background: rgba(255,255,255,0.14); }
     .lightbox-nav--prev { left: 1rem; }
     .lightbox-nav--next { right: 1rem; }
 
-    /* Empty state */
-    .gallery-empty-state {
-      padding: clamp(4rem,8vw,7rem) 0;
-      text-align: center;
-    }
-    .gallery-empty-icon {
-      width: 5rem; height: 5rem;
-      border-radius: 50%;
-      background: rgba(201,170,111,0.08);
-      border: 1px solid rgba(201,170,111,0.15);
-      display: grid;
-      place-items: center;
-      margin: 0 auto 1.5rem;
-    }
-    .gallery-empty-icon svg {
-      width: 2.2rem; height: 2.2rem;
-      stroke: rgba(201,170,111,0.5);
-      fill: none;
-      stroke-width: 1.2;
-    }
-    .gallery-empty-state h3 {
-      margin: 0 0 0.6rem;
-      font-size: var(--t-xl);
-      color: var(--text);
-      letter-spacing: -0.03em;
-    }
-    .gallery-empty-state p {
-      margin: 0 auto;
-      max-width: 38ch;
-      color: var(--text-dim);
-      font-size: var(--t-sm);
-      line-height: 1.7;
-    }
-
-    /* Section count pill */
-    .section-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.3rem 0.8rem;
-      border-radius: 999px;
-      background: rgba(201,170,111,0.1);
-      border: 1px solid rgba(201,170,111,0.18);
-      color: var(--accent);
-      font-size: var(--t-xs);
-      font-weight: 600;
-      letter-spacing: 0.06em;
-    }
-
-    /* Jump nav */
-    .gallery-jump-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 2.5rem;
-    }
-    .gallery-jump-btn {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.09);
-      color: rgba(255,255,255,0.72);
-      font-size: var(--t-xs);
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
-      text-decoration: none;
-    }
-    .gallery-jump-btn:hover {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border-color: rgba(255,255,255,0.16);
-    }
-
-    /* ── Before & After Slider ── */
-    .ba-section { }
-    .ba-slider {
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--r-xl);
-      cursor: ew-resize;
-      user-select: none;
-      aspect-ratio: 16/9;
-      background: #0b0d11;
-      touch-action: none;
-    }
-    .ba-before, .ba-after { position: absolute; inset: 0; }
-    .ba-before img, .ba-after img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
-    .ba-after { clip-path: inset(0 0 0 50%); }
-    .ba-divider {
-      position: absolute; top: 0; bottom: 0; left: 50%;
-      width: 3px;
-      background: rgba(255,255,255,0.92);
-      transform: translateX(-50%);
-      pointer-events: none;
-      box-shadow: 0 0 16px rgba(0,0,0,0.5);
-    }
-    .ba-handle {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 2.75rem; height: 2.75rem;
-      border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 0 0 3px rgba(255,255,255,0.25);
-      display: flex; align-items: center; justify-content: center;
-      color: #111;
-    }
-    .ba-label {
-      position: absolute; bottom: 0.85rem;
-      padding: 0.28rem 0.7rem;
-      border-radius: 999px;
-      font-size: 0.68rem; font-weight: 800;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(8px);
-      color: rgba(255,255,255,0.9);
-      border: 1px solid rgba(255,255,255,0.15);
-      pointer-events: none;
-    }
-    .ba-label--before { left: 0.85rem; }
-    .ba-label--after  { right: 0.85rem; background: var(--accent); color: #111; border-color: var(--accent); }
-    .ba-captions {
-      display: flex; justify-content: space-between; gap: 1rem;
-      margin-top: 0.75rem; padding: 0 0.2rem;
-    }
-    .ba-captions span { font-size: var(--t-xs); color: rgba(255,255,255,0.38); }
-    .ba-meta { margin-top: 0.4rem; }
-    .ba-location { font-size: var(--t-xs); color: var(--accent); display: inline-block; margin-bottom: 0.25rem; }
-
-    /* Gallery card entrance animation */
-    @keyframes gCardIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
-    .gphoto-card { animation: gCardIn 360ms ease both; }
-
-    /* Type badge on jump nav */
-    .jump-type { font-size: 0.6rem; opacity: 0.55; margin-left: 0.25rem; }
-
-    /* ── Gallery video players ── */
-    .gallery-videos-wrap {
-      display: grid;
-      gap: 0.85rem;
-      margin-bottom: 1.5rem;
-    }
-    @media (min-width: 640px) {
-      .gallery-videos-wrap { grid-template-columns: repeat(auto-fill, minmax(min(480px, 100%), 1fr)); }
-    }
-    .gallery-video-item {
-      border-radius: var(--r-xl);
-      overflow: hidden;
-      background: #0b0d11;
-      border: 1px solid rgba(255,255,255,0.07);
-    }
-    .gallery-video {
-      width: 100%;
-      display: block;
-      aspect-ratio: 16/9;
-      background: #0b0d11;
-    }
-    .gallery-video-caption {
-      padding: 0.65rem 1rem;
-      font-size: var(--t-xs);
-      color: var(--text-dim);
-    }
-
     @media (max-width: 820px) {
-      .gphoto-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-      .gphoto-grid.cols-1 { grid-template-columns: 1fr; }
-      .gallery-hero-strip { grid-template-columns: repeat(2, 1fr); }
-      .gallery-hero-strip .strip-img:last-child { display: none; }
+      .proj-layout--grid .proj-photos,
+      .proj-layout--split .proj-photos { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .proj-layout--hero .proj-photos  { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .proj-featured { grid-template-columns: 1fr 1fr; }
       .gsection-head { flex-direction: column; gap: 0.5rem; }
-      .lightbox-nav { display: none; }
-      .ba-slider { aspect-ratio: 4/3; }
-    }
-
-    @media (max-width: 540px) {
-      .gphoto-grid, .gphoto-grid.cols-2 { grid-template-columns: 1fr; }
+      .lightbox-nav  { display: none; }
       .gallery-hero-strip { grid-template-columns: 1fr; }
-      .gallery-hero-strip .strip-img:not(:first-child) { display: none; }
-      .ba-slider { aspect-ratio: 4/3; border-radius: var(--r-lg); }
-      .ba-handle { width: 2.2rem; height: 2.2rem; }
+      .gallery-hero-strip .strip-img:last-child { display: none; }
+    }
+    @media (max-width: 540px) {
+      .proj-layout--grid .proj-photos,
+      .proj-layout--split .proj-photos,
+      .proj-layout--hero .proj-photos { grid-template-columns: 1fr; }
+      .proj-featured { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -455,34 +190,278 @@
         <div style="max-width: 54rem;" data-reveal>
           <span class="eyebrow">Our work</span>
           <h1 style="margin: 0.85rem 0 1rem; font-size: var(--t-3xl); line-height: 1; letter-spacing: -0.045em; color: var(--text);">Projects built with precision, finished with care.</h1>
-          <p style="margin: 0; font-size: var(--t-lg); color: var(--text-dim); max-width: 52ch;">Real sites, real results. Each section below represents a project or project type — including before and after photography showing the full transformation.</p>
+          <p style="margin: 0; font-size: var(--t-lg); color: var(--text-dim); max-width: 52ch;">Real sites, real results. Thirteen completed projects across Greater Melbourne — walls, fencing and excavation delivered to a premium standard.</p>
         </div>
-
-        <!-- Three-panel hero image strip using site photos -->
         <div class="gallery-hero-strip" data-reveal>
           <div class="strip-img">
-            <img src="hero-wall.jpg" alt="Completed retaining wall project" loading="lazy">
+            <img src="projectImagesRetain/explo1.jpeg" alt="Completed retaining wall project" loading="lazy">
           </div>
           <div class="strip-img">
-            <img src="services-install.jpg" alt="Retaining wall installation in progress" loading="lazy">
-          </div>
-          <div class="strip-img">
-            <img src="services-timber.jpg" alt="Completed timber retaining wall" loading="lazy">
+            <img src="projectImagesRetain/explo2.jpeg" alt="Completed fencing and retaining project" loading="lazy">
           </div>
         </div>
       </div>
     </section>
 
-    <!-- =================== GALLERY SECTIONS =================== -->
+    <!-- =================== GALLERY =================== -->
     <section class="section section--dark gallery-sections">
       <div class="inner">
-        <!-- Jump navigation — rendered by JS once sections are known -->
-        <div id="gallery-jump" style="display:none;">
-          <div class="gallery-jump-nav" id="gallery-jump-nav"></div>
+
+        <div class="gallery-jump-nav">
+          <a class="gallery-jump-btn" href="#proj-01">01 — Timber Sleeper System</a>
+          <a class="gallery-jump-btn" href="#proj-02">02 — Concrete Sleeper Walls</a>
+          <a class="gallery-jump-btn" href="#proj-03">03 — Driveway Retention</a>
+          <a class="gallery-jump-btn" href="#proj-04">04 — Boundary Fencing</a>
+          <a class="gallery-jump-btn" href="#proj-05">05 — Garden Terrace</a>
+          <a class="gallery-jump-btn" href="#proj-06">06 — Estate Slope Retention</a>
+          <a class="gallery-jump-btn" href="#proj-07">07 — Pool Surround &amp; Fencing</a>
+          <a class="gallery-jump-btn" href="#proj-08">08 — Concrete Block System</a>
+          <a class="gallery-jump-btn" href="#proj-09">09 — Hillside Terrace</a>
+          <a class="gallery-jump-btn" href="#proj-10">10 — Rear Yard Wall</a>
+          <a class="gallery-jump-btn" href="#proj-11">11 — Colorbond Fencing</a>
+          <a class="gallery-jump-btn" href="#proj-12">12 — Multi-Level Garden</a>
+          <a class="gallery-jump-btn" href="#proj-13">13 — Retaining &amp; Drainage</a>
         </div>
 
-        <!-- Main gallery output -->
-        <div id="gallery-output"></div>
+        <!-- ── 01 · Style A — equal grid ── -->
+        <div class="gsection proj-layout--grid" id="proj-01" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 01</span>
+              <h2>Timber Sleeper System</h2>
+              <p>Structural timber sleeper retaining with stepped terracing and integrated drainage behind each tier.</p>
+            </div>
+            <span class="gsection-count">4 photos</span>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project1-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project1-1.jpeg" alt="Timber sleeper wall" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project1-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project1-2.jpeg" alt="Timber sleeper wall" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project1-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project1-3.jpeg" alt="Timber sleeper wall" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project1-4.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project1-4.jpeg" alt="Timber sleeper wall" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 02 · Style B — hero + strip ── -->
+        <div class="gsection proj-layout--hero" id="proj-02" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 02</span>
+              <h2>Concrete Sleeper Walls</h2>
+              <p>Contemporary concrete sleeper retaining with steel H-post construction and a crisp exposed-face finish.</p>
+            </div>
+            <span class="gsection-count">4 photos</span>
+          </div>
+          <div class="proj-hero-wrap proj-card" data-lb="projectImagesRetain/project2-1.jpeg" tabindex="0" role="button" aria-label="View photo">
+            <img src="projectImagesRetain/project2-1.jpeg" alt="Concrete sleeper wall" loading="lazy">
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project2-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project2-2.jpeg" alt="Concrete sleeper wall" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project2-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project2-3.jpeg" alt="Concrete sleeper wall" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project2-4.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project2-4.jpeg" alt="Concrete sleeper wall" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 03 · Style C — asymmetric split + grid ── -->
+        <div class="gsection proj-layout--split" id="proj-03" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 03</span>
+              <h2>Driveway Retention</h2>
+              <p>Driveway-edge retaining wall with compacted base preparation and clean top-of-wall capping detail.</p>
+            </div>
+            <span class="gsection-count">3 photos</span>
+          </div>
+          <div class="proj-featured">
+            <article class="proj-card" data-lb="projectImagesRetain/project3-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project3-1.jpeg" alt="Driveway retention" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project3-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project3-2.jpeg" alt="Driveway retention" loading="lazy"></div></article>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project3-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project3-3.jpeg" alt="Driveway retention" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 04 · Style A — equal grid ── -->
+        <div class="gsection proj-layout--grid" id="proj-04" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 04</span>
+              <h2>Boundary Fencing</h2>
+              <p>Full perimeter boundary fencing with concrete post footings and gate integration.</p>
+            </div>
+            <span class="gsection-count">2 photos</span>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project4-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project4-1.jpeg" alt="Boundary fencing" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project4-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project4-2.jpeg" alt="Boundary fencing" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 05 · Style B — hero + strip ── -->
+        <div class="gsection proj-layout--hero" id="proj-05" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 05</span>
+              <h2>Garden Terrace Retaining</h2>
+              <p>Stepped residential retaining walls creating usable flat garden terraces with drainage behind each level.</p>
+            </div>
+            <span class="gsection-count">3 photos</span>
+          </div>
+          <div class="proj-hero-wrap proj-card" data-lb="projectImagesRetain/project5-1.jpeg" tabindex="0" role="button" aria-label="View photo">
+            <img src="projectImagesRetain/project5-1.jpeg" alt="Garden terrace retaining" loading="lazy">
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project5-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project5-2.jpeg" alt="Garden terrace retaining" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project5-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project5-3.jpeg" alt="Garden terrace retaining" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 06 · Style C — asymmetric split + grid ── -->
+        <div class="gsection proj-layout--split" id="proj-06" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 06</span>
+              <h2>Estate Slope Retention</h2>
+              <p>Large-scale slope stabilisation across a sloped residential estate block with a multi-run wall system.</p>
+            </div>
+            <span class="gsection-count">5 photos</span>
+          </div>
+          <div class="proj-featured">
+            <article class="proj-card" data-lb="projectImagesRetain/project6-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project6-1.jpeg" alt="Estate slope retention" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project6-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project6-2.jpeg" alt="Estate slope retention" loading="lazy"></div></article>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project6-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project6-3.jpeg" alt="Estate slope retention" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project6-4.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project6-4.jpeg" alt="Estate slope retention" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project6-5.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project6-5.jpeg" alt="Estate slope retention" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 07 · Style A — equal grid ── -->
+        <div class="gsection proj-layout--grid" id="proj-07" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 07</span>
+              <h2>Pool Surround &amp; Fencing</h2>
+              <p>Pool surround retaining with compliant pool fencing establishing level ground around the full pool perimeter.</p>
+            </div>
+            <span class="gsection-count">4 photos</span>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project7-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project7-1.jpeg" alt="Pool surround and fencing" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project7-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project7-2.jpeg" alt="Pool surround and fencing" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project7-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project7-3.jpeg" alt="Pool surround and fencing" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project7-4.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project7-4.jpeg" alt="Pool surround and fencing" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 08 · Style B — hero + strip ── -->
+        <div class="gsection proj-layout--hero" id="proj-08" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 08</span>
+              <h2>Concrete Block Retaining</h2>
+              <p>Engineered concrete block retaining system for a steeply sloped rear yard with a tiered landscape outcome.</p>
+            </div>
+            <span class="gsection-count">4 photos</span>
+          </div>
+          <div class="proj-hero-wrap proj-card" data-lb="projectImagesRetain/project8-1.jpeg" tabindex="0" role="button" aria-label="View photo">
+            <img src="projectImagesRetain/project8-1.jpeg" alt="Concrete block retaining" loading="lazy">
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project8-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project8-2.jpeg" alt="Concrete block retaining" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project8-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project8-3.jpeg" alt="Concrete block retaining" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project8-4.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project8-4.jpeg" alt="Concrete block retaining" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 09 · Style C — asymmetric split + grid ── -->
+        <div class="gsection proj-layout--split" id="proj-09" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 09</span>
+              <h2>Hillside Terrace Works</h2>
+              <p>Hillside residential terracing using concrete sleepers to create usable flat space across a steep block.</p>
+            </div>
+            <span class="gsection-count">3 photos</span>
+          </div>
+          <div class="proj-featured">
+            <article class="proj-card" data-lb="projectImagesRetain/project9-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project9-1.jpeg" alt="Hillside terrace works" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project9-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project9-2.jpeg" alt="Hillside terrace works" loading="lazy"></div></article>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project9-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project9-3.jpeg" alt="Hillside terrace works" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 10 · Style A — equal grid ── -->
+        <div class="gsection proj-layout--grid" id="proj-10" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 10</span>
+              <h2>Rear Yard Retaining Wall</h2>
+              <p>Rear property retaining wall with neat top capping and a clean exposed face at finished ground level.</p>
+            </div>
+            <span class="gsection-count">2 photos</span>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project10-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project10-1.jpeg" alt="Rear yard retaining wall" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project10-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project10-2.jpeg" alt="Rear yard retaining wall" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 11 · Style B — hero + strip ── -->
+        <div class="gsection proj-layout--hero" id="proj-11" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 11</span>
+              <h2>Colorbond Fencing</h2>
+              <p>Full perimeter Colorbond fencing with steel post footings and automated gate integration.</p>
+            </div>
+            <span class="gsection-count">2 photos</span>
+          </div>
+          <div class="proj-hero-wrap proj-card" data-lb="projectImagesRetain/project11-1.jpeg" tabindex="0" role="button" aria-label="View photo">
+            <img src="projectImagesRetain/project11-1.jpeg" alt="Colorbond fencing" loading="lazy">
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project11-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project11-2.jpeg" alt="Colorbond fencing" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 12 · Style C — asymmetric split + grid ── -->
+        <div class="gsection proj-layout--split" id="proj-12" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 12</span>
+              <h2>Multi-Level Garden Walls</h2>
+              <p>Multi-level concrete sleeper walls shaping a split-level outdoor space with clean transitions between tiers.</p>
+            </div>
+            <span class="gsection-count">3 photos</span>
+          </div>
+          <div class="proj-featured">
+            <article class="proj-card" data-lb="projectImagesRetain/project12-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project12-1.jpeg" alt="Multi-level garden walls" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project12-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project12-2.jpeg" alt="Multi-level garden walls" loading="lazy"></div></article>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project12-3.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project12-3.jpeg" alt="Multi-level garden walls" loading="lazy"></div></article>
+          </div>
+        </div>
+
+        <!-- ── 13 · Style A — equal grid ── -->
+        <div class="gsection proj-layout--grid" id="proj-13" data-reveal>
+          <div class="gsection-head">
+            <div class="gsection-title-block">
+              <span class="kicker" style="color:var(--accent)">Project 13</span>
+              <h2>Retaining &amp; Drainage</h2>
+              <p>Site excavation, retaining wall construction and drainage preparation for a new residential build.</p>
+            </div>
+            <span class="gsection-count">2 photos</span>
+          </div>
+          <div class="proj-photos">
+            <article class="proj-card" data-lb="projectImagesRetain/project13-1.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project13-1.jpeg" alt="Retaining and drainage" loading="lazy"></div></article>
+            <article class="proj-card" data-lb="projectImagesRetain/project13-2.jpeg" tabindex="0" role="button" aria-label="View photo"><div class="proj-img"><img src="projectImagesRetain/project13-2.jpeg" alt="Retaining and drainage" loading="lazy"></div></article>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -513,10 +492,6 @@
     <div class="lightbox-img-wrap">
       <img id="lb-img" src="" alt="">
     </div>
-    <div class="lightbox-meta">
-      <h4 id="lb-title"></h4>
-      <p id="lb-desc"></p>
-    </div>
   </div>
 
   <div data-site-footer></div>
@@ -524,276 +499,46 @@
   <script>
   (function () {
     'use strict';
-    const GALLERY_KEY = 'ace_gallery_v1';
 
-    async function getData() {
-      try {
-        const res = await fetch('gallery-data.json?v=' + Date.now());
-        if (res.ok) return await res.json();
-      } catch {}
-      try { return JSON.parse(localStorage.getItem(GALLERY_KEY)) || []; } catch { return []; }
-    }
-    function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+    const cards = Array.from(document.querySelectorAll('[data-lb]'));
+    let current = 0;
 
-    /* ── IndexedDB blob resolution (mirrors admin) ── */
-    const IDB_DB    = 'ace_gallery_blobs';
-    const IDB_STORE = 'blobs';
-    function openBlobDB() {
-      return new Promise((res, rej) => {
-        const req = indexedDB.open(IDB_DB, 1);
-        req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
-        req.onsuccess  = e => res(e.target.result);
-        req.onerror    = e => rej(e.target.error);
-      });
-    }
-    async function getBlob(key) {
-      const db = await openBlobDB();
-      return new Promise((res, rej) => {
-        const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
-        req.onsuccess = () => res(req.result || null);
-        req.onerror   = e => rej(e.target.error);
-      });
-    }
-    const _urlCache = {};
-    async function resolveUrl(url) {
-      if (!url || !url.startsWith('idb:')) return url || '';
-      if (_urlCache[url]) return _urlCache[url];
-      try {
-        const blob = await getBlob(url.slice(4));
-        if (!blob) return '';
-        const oUrl = URL.createObjectURL(blob);
-        _urlCache[url] = oUrl; return oUrl;
-      } catch { return ''; }
-    }
-    async function resolveAllData(data) {
-      return Promise.all(data.map(async sec => {
-        if (sec.type === 'before-after') return { ...sec,
-          before: { ...sec.before, url: await resolveUrl(sec.before?.url) },
-          after:  { ...sec.after,  url: await resolveUrl(sec.after?.url) }
-        };
-        if (sec.type === 'gallery') return { ...sec,
-          images: await Promise.all((sec.images || []).map(async i => ({ ...i, url: await resolveUrl(i.url) })))
-        };
-        return sec;
-      }));
-    }
-
-    /* ── Lightbox ── */
-    let allImages = [];
-    let lbIndex   = 0;
-
-    function openLightbox(idx) {
-      if (!allImages.length) return;
-      lbIndex = idx;
-      const img = allImages[idx];
-      document.getElementById('lb-img').src = img.url || '';
-      document.getElementById('lb-img').alt = img.caption || 'Project photo';
-      document.getElementById('lb-title').textContent = img.caption || '';
-      document.getElementById('lb-desc').textContent  = img.description || '';
+    function open(idx) {
+      current = idx;
+      document.getElementById('lb-img').src = cards[idx].dataset.lb;
       document.getElementById('lightbox').classList.add('is-open');
       document.body.style.overflow = 'hidden';
     }
-    function closeLightbox() {
+    function close() {
       document.getElementById('lightbox').classList.remove('is-open');
       document.body.style.overflow = '';
     }
-    function lbNav(dir) { lbIndex = (lbIndex + dir + allImages.length) % allImages.length; openLightbox(lbIndex); }
+    function nav(dir) { open((current + dir + cards.length) % cards.length); }
 
-    document.getElementById('lb-close').addEventListener('click', closeLightbox);
-    document.getElementById('lb-prev').addEventListener('click', () => lbNav(-1));
-    document.getElementById('lb-next').addEventListener('click', () => lbNav(1));
-    document.getElementById('lightbox').addEventListener('click', function (e) { if (e.target === this) closeLightbox(); });
-    document.addEventListener('keydown', e => {
-      if (!document.getElementById('lightbox').classList.contains('is-open')) return;
-      if (e.key === 'Escape')     closeLightbox();
-      if (e.key === 'ArrowLeft')  lbNav(-1);
-      if (e.key === 'ArrowRight') lbNav(1);
+    cards.forEach((el, i) => {
+      el.addEventListener('click', () => open(i));
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(i); } });
     });
 
-    /* ── Before & After slider ── */
-    function initBASliders() {
-      document.querySelectorAll('[data-ba-slider]').forEach(slider => {
-        const after   = slider.querySelector('.ba-after');
-        const divider = slider.querySelector('.ba-divider');
-        let dragging  = false;
+    document.getElementById('lb-close').addEventListener('click', close);
+    document.getElementById('lb-prev').addEventListener('click', () => nav(-1));
+    document.getElementById('lb-next').addEventListener('click', () => nav(1));
+    document.getElementById('lightbox').addEventListener('click', function (e) { if (e.target === this) close(); });
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('is-open')) return;
+      if (e.key === 'Escape')     close();
+      if (e.key === 'ArrowLeft')  nav(-1);
+      if (e.key === 'ArrowRight') nav(1);
+    });
 
-        function setPos(clientX) {
-          const r   = slider.getBoundingClientRect();
-          const pct = Math.max(3, Math.min(97, ((clientX - r.left) / r.width) * 100));
-          after.style.clipPath   = `inset(0 0 0 ${pct}%)`;
-          divider.style.left     = pct + '%';
-        }
-
-        slider.addEventListener('mousedown',  e => { dragging = true; setPos(e.clientX); e.preventDefault(); });
-        slider.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
-        window.addEventListener('mousemove',  e => { if (dragging) setPos(e.clientX); });
-        window.addEventListener('touchmove',  e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
-        window.addEventListener('mouseup',    () => dragging = false);
-        window.addEventListener('touchend',   () => dragging = false);
-      });
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+      }, { threshold: 0.06 });
+      document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+    } else {
+      document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('is-visible'));
     }
-
-    /* ── Build before-after section HTML ── */
-    function buildBASection(section) {
-      return `
-        <div class="gsection ba-section" id="gs-${esc(section.id)}" data-reveal>
-          <div class="gsection-head">
-            <div class="gsection-title-block">
-              <span class="kicker" style="color:var(--accent);">Before &amp; After</span>
-              <h2>${esc(section.title)}</h2>
-              ${section.description ? `<p>${esc(section.description)}</p>` : ''}
-            </div>
-            <span class="gsection-count" style="display:flex;align-items:center;gap:0.35rem;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l-6-6 6-6M15 6l6 6-6 6"/></svg>
-              Drag to compare
-            </span>
-          </div>
-          <div class="ba-slider" data-ba-slider>
-            <div class="ba-before">
-              <img src="${esc(section.before.url)}" alt="Before: ${esc(section.before.caption || section.title)}" loading="lazy">
-              <span class="ba-label ba-label--before">Before</span>
-            </div>
-            <div class="ba-after" style="clip-path:inset(0 0 0 50%);">
-              <img src="${esc(section.after.url)}" alt="After: ${esc(section.after.caption || section.title)}" loading="lazy">
-              <span class="ba-label ba-label--after">After</span>
-            </div>
-            <div class="ba-divider" style="left:50%;">
-              <div class="ba-handle">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l-6-6 6-6M15 6l6 6-6 6"/></svg>
-              </div>
-            </div>
-          </div>
-          ${section.before.caption || section.after.caption || section.location ? `
-          <div class="ba-meta">
-            ${section.location ? `<span class="ba-location">📍 ${esc(section.location)}</span>` : ''}
-            ${(section.before.caption || section.after.caption) ? `
-            <div class="ba-captions">
-              <span>${esc(section.before.caption || '')}</span>
-              <span>${esc(section.after.caption || '')}</span>
-            </div>` : ''}
-          </div>` : ''}
-        </div>`;
-    }
-
-    /* ── Build gallery section HTML ── */
-    function buildGallerySection(section, globalImgIdx) {
-      const allItems = (section.images || []).filter(i => i.url);
-      const videos   = allItems.filter(i => i.type === 'video');
-      const imgs     = allItems.filter(i => i.type !== 'video');
-      const colCls   = imgs.length === 1 ? 'cols-1' : imgs.length === 2 ? 'cols-2' : '';
-
-      const videoHTML = videos.length ? `
-        <div class="gallery-videos-wrap">
-          ${videos.map(v => `
-            <div class="gallery-video-item">
-              <video class="gallery-video" controls preload="metadata" playsinline>
-                <source src="${esc(v.url)}">
-                Your browser doesn't support HTML5 video.
-              </video>
-              ${v.caption ? `<div class="gallery-video-caption">${esc(v.caption)}</div>` : ''}
-            </div>`).join('')}
-        </div>` : '';
-
-      const cards = imgs.map((img, ci) => {
-        const idx = globalImgIdx.value++;
-        allImages.push(img);
-        return `
-          <article class="gphoto-card" data-lb-idx="${idx}" style="animation-delay:${ci * 55}ms" tabindex="0" role="button" aria-label="View photo${img.caption ? ': ' + img.caption : ''}">
-            <div class="gphoto-img">
-              <img src="${esc(img.url)}" alt="${esc(img.caption || 'Project photo')}" loading="lazy">
-            </div>
-            ${img.caption ? `<div class="gphoto-body"><h4>${esc(img.caption)}</h4></div>` : ''}
-          </article>`;
-      }).join('');
-
-      const countParts = [
-        imgs.length   ? `${imgs.length} photo${imgs.length !== 1 ? 's' : ''}`     : '',
-        videos.length ? `${videos.length} video${videos.length !== 1 ? 's' : ''}` : ''
-      ].filter(Boolean);
-
-      return `
-        <div class="gsection" id="gs-${esc(section.id)}" data-reveal>
-          <div class="gsection-head">
-            <div class="gsection-title-block">
-              <span class="kicker" style="color:var(--accent);">Gallery</span>
-              <h2>${esc(section.title)}</h2>
-              ${section.description ? `<p>${esc(section.description)}</p>` : ''}
-            </div>
-            <span class="gsection-count">${countParts.join(' · ')}</span>
-          </div>
-          ${videoHTML}
-          ${imgs.length
-            ? `<div class="gphoto-grid ${colCls}">${cards}</div>`
-            : (!videos.length ? `<p style="color:var(--text-dim);font-size:var(--t-sm);">No photos in this section yet.</p>` : '')}
-        </div>`;
-    }
-
-    /* ── Main render ── */
-    async function renderGallery() {
-      const data     = await resolveAllData(await getData());
-      const output   = document.getElementById('gallery-output');
-      const jumpWrap = document.getElementById('gallery-jump');
-      const jumpNav  = document.getElementById('gallery-jump-nav');
-
-      allImages = [];
-
-      const hasContent = data.some(s =>
-        (s.type === 'before-after' && s.before && s.after) ||
-        (s.type === 'gallery' && s.images && s.images.length)
-      );
-
-      if (!data.length || !hasContent) {
-        output.innerHTML = `
-          <div class="gallery-empty-state">
-            <div class="gallery-empty-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            </div>
-            <h3>Gallery coming soon</h3>
-            <p>Our project photos are on their way. Check back soon for before and after comparisons and completed project galleries.</p>
-          </div>`;
-        return;
-      }
-
-      /* Jump nav */
-      if (data.length > 1) {
-        jumpWrap.style.display = '';
-        jumpNav.innerHTML = data.map(s => {
-          const typeLabel = s.type === 'before-after' ? '⟷' : '⊞';
-          return `<a class="gallery-jump-btn" href="#gs-${esc(s.id)}">${typeLabel} ${esc(s.title)}</a>`;
-        }).join('');
-      }
-
-      /* Render sections */
-      const imgIdx = { value: 0 };
-      output.innerHTML = data.map(section => {
-        if (section.type === 'before-after') return buildBASection(section);
-        if (section.type === 'gallery')      return buildGallerySection(section, imgIdx);
-        return '';
-      }).join('');
-
-      /* Wire lightbox on gallery cards */
-      output.querySelectorAll('[data-lb-idx]').forEach(el => {
-        const idx = Number(el.dataset.lbIdx);
-        el.addEventListener('click', () => openLightbox(idx));
-        el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(idx); } });
-      });
-
-      /* Init BA sliders */
-      initBASliders();
-
-      /* Reveal animation */
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver(entries => {
-          entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
-        }, { threshold: 0.08 });
-        output.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
-      } else {
-        output.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('is-visible'));
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => renderGallery());
-    window.addEventListener('storage', e => { if (e.key === GALLERY_KEY) renderGallery(); });
 
   })();
   </script>
