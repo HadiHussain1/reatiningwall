@@ -8,11 +8,7 @@ const siteHeader = `
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="index.html" aria-label="RetainTech home">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-text">
-        <strong>RetainTech</strong>
-        <span>Premium walls & fencing</span>
-      </span>
+      <img src="logo1.jpeg" alt="RetainTech Retaining Walls &amp; Fencing" class="brand-logo">
     </a>
 
     <nav class="site-nav" aria-label="Primary navigation" data-nav>
